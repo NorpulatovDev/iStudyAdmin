@@ -57,7 +57,7 @@ class GroupRepository {
   Future<List<GroupModel>> getGroupsByCourse(int courseId) async {
     try {
       final response = await _apiService.dio.get(
-        ApiConstants.groupsEndpoint,
+        "${ApiConstants.groupsEndpoint}/by-course",
         queryParameters: {'courseId': courseId},
       );
 

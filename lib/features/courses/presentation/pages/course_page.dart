@@ -441,9 +441,40 @@ class _CoursePageState extends State<CoursePage> {
                             course: course,
                             onTap: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      GroupsPage(courseId: course.id),
+                                PageRouteBuilder(
+                                  pageBuilder:
+                                      (
+                                        context,
+                                        animation,
+                                        secondaryAnimation,
+                                      ) => GroupsPage(
+                                        courseId: course.id,
+                                        courseName: course.name,
+                                      ),
+                                  transitionsBuilder:
+                                      (
+                                        context,
+                                        animation,
+                                        secondaryAnimation,
+                                        child,
+                                      ) {
+                                        return SlideTransition(
+                                          position: animation.drive(
+                                            Tween(
+                                              begin: const Offset(1.0, 0.0),
+                                              end: Offset.zero,
+                                            ).chain(
+                                              CurveTween(
+                                                curve: Curves.easeInOut,
+                                              ),
+                                            ),
+                                          ),
+                                          child: child,
+                                        );
+                                      },
+                                  transitionDuration: const Duration(
+                                    milliseconds: 300,
+                                  ),
                                 ),
                               );
                             },

@@ -5,10 +5,12 @@ import './core/injection/injection_container.dart';
 import './features/auth/data/repositories/auth_repository.dart';
 import './features/courses/data/repositories/course_repository.dart';
 import './features/groups/data/repositories/group_repository.dart';
+import './features/students/data/repositories/student_repository.dart';
 import './core/theme/app_theme.dart';
 import './features/auth/presentation/bloc/auth_bloc.dart';
 import './features/courses/presentation/bloc/course_bloc.dart';
 import './features/groups/presentation/bloc/group_bloc.dart';
+import './features/students/presentation/bloc/student_bloc.dart';
 import './features/auth/presentation/pages/login_page.dart';
 import './features/main/presentation/pages/main_layout.dart';
 
@@ -28,6 +30,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => GroupBloc(sl<GroupRepository>()),
+        ),
+        BlocProvider(
+          create: (context) => StudentBloc(sl<StudentRepository>()),
         ),
       ],
       child: MaterialApp(

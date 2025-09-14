@@ -23,15 +23,27 @@ class GroupCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Card(
-        elevation: 2,
+        elevation: 3,
+        shadowColor: Colors.black.withOpacity(0.1),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Colors.purple.withOpacity(0.02),
+                ],
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -39,18 +51,30 @@ class GroupCard extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.purple,
+                            Colors.purple.withOpacity(0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.purple.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: const Icon(
                         Icons.group,
-                        color: Colors.purple,
+                        color: Colors.white,
                         size: 20,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,11 +87,23 @@ class GroupCard extends StatelessWidget {
                               color: Color(0xFF1F2937),
                             ),
                           ),
-                          Text(
-                            group.courseName,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              group.courseName,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -75,9 +111,17 @@ class GroupCard extends StatelessWidget {
                     ),
                     if (onEdit != null || onDelete != null)
                       PopupMenuButton<String>(
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: Colors.grey[600],
+                        icon: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.more_vert,
+                            size: 18,
+                            color: Colors.grey[600],
+                          ),
                         ),
                         onSelected: (value) {
                           switch (value) {
@@ -95,9 +139,9 @@ class GroupCard extends StatelessWidget {
                               value: 'edit',
                               child: Row(
                                 children: [
-                                  Icon(Icons.edit_outlined, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Edit'),
+                                  Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                                  SizedBox(width: 12),
+                                  Text('Edit Group'),
                                 ],
                               ),
                             ),
@@ -106,11 +150,9 @@ class GroupCard extends StatelessWidget {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  Icon(Icons.delete_outline, 
-                                       color: Colors.red, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Delete', 
-                                       style: TextStyle(color: Colors.red)),
+                                  Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                  SizedBox(width: 12),
+                                  Text('Delete', style: TextStyle(color: Colors.red)),
                                 ],
                               ),
                             ),
@@ -128,12 +170,12 @@ class GroupCard extends StatelessWidget {
                     if (group.teacherName != null) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                          horizontal: 12,
+                          vertical: 6,
                         ),
                         decoration: BoxDecoration(
                           color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -149,24 +191,36 @@ class GroupCard extends StatelessWidget {
                               style: const TextStyle(
                                 color: AppTheme.primaryColor,
                                 fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                     ],
                     
-                    // Student count
+                    // Student count with enhanced visual appeal
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                        horizontal: 12,
+                        vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.successColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.successColor,
+                            AppTheme.successColor.withOpacity(0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.successColor.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -174,15 +228,15 @@ class GroupCard extends StatelessWidget {
                           const Icon(
                             Icons.people,
                             size: 14,
-                            color: AppTheme.successColor,
+                            color: Colors.white,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             '${group.studentCount} students',
                             style: const TextStyle(
-                              color: AppTheme.successColor,
+                              color: Colors.white,
                               fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -194,12 +248,12 @@ class GroupCard extends StatelessWidget {
                     // Branch badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         group.branchName,
@@ -213,9 +267,9 @@ class GroupCard extends StatelessWidget {
                   ],
                 ),
                 
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 
-                // Footer
+                // Footer Row with Action Button
                 Row(
                   children: [
                     Icon(
@@ -229,6 +283,41 @@ class GroupCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.grey[500],
+                      ),
+                    ),
+                    const Spacer(),
+                    
+                    // View Students Button
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        border: Border.all(
+                          color: Colors.purple.withOpacity(0.3),
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.arrow_forward,
+                            size: 12,
+                            color: Colors.purple[700],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'View Students',
+                            style: TextStyle(
+                              color: Colors.purple[700],
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
