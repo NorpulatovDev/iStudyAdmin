@@ -10,6 +10,8 @@ import '../../features/groups/data/repositories/group_repository.dart';
 import '../../features/groups/presentation/bloc/group_bloc.dart';
 import '../../features/students/data/repositories/student_repository.dart';
 import '../../features/students/presentation/bloc/student_bloc.dart';
+import '../../features/teachers/data/repositories/teacher_repository.dart';
+import '../../features/teachers/presentation/bloc/teacher_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -35,9 +37,14 @@ Future<void> setupLocator() async {
     () => StudentRepository(sl<ApiService>(), sl<StorageService>()),
   );
 
+  sl.registerLazySingleton<TeacherRepository>(
+    () => TeacherRepository(sl<ApiService>(), sl<StorageService>()),
+  );
+
   // BLoCs
   sl.registerLazySingleton<AuthBloc>(() => AuthBloc(sl<AuthRepository>()));
   sl.registerLazySingleton<CourseBloc>(() => CourseBloc(sl<CourseRepository>()));
   sl.registerLazySingleton<GroupBloc>(() => GroupBloc(sl<GroupRepository>()));
   sl.registerLazySingleton<StudentBloc>(() => StudentBloc(sl<StudentRepository>()));
+  sl.registerLazySingleton<TeacherBloc>(() => TeacherBloc(sl<TeacherRepository>()));
 }
