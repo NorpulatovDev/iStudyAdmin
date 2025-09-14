@@ -22,6 +22,9 @@ class ApiConstants {
   // Course endpoints
   static const String coursesEndpoint = '/courses';
 
+  // Group endpoints
+  static const String groupsEndpoint = '/groups';
+
   // Teacher endpoints
   static const String teachersEndpoint = '/teachers';
 
