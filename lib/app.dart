@@ -7,12 +7,16 @@ import './features/courses/data/repositories/course_repository.dart';
 import './features/groups/data/repositories/group_repository.dart';
 import './features/students/data/repositories/student_repository.dart';
 import './features/teachers/data/repositories/teacher_repository.dart';
+import './features/payments/data/repositories/payment_repository.dart';
+import './features/reports/data/repositories/report_repository.dart';
 import './core/theme/app_theme.dart';
 import './features/auth/presentation/bloc/auth_bloc.dart';
 import './features/courses/presentation/bloc/course_bloc.dart';
 import './features/groups/presentation/bloc/group_bloc.dart';
 import './features/students/presentation/bloc/student_bloc.dart';
 import './features/teachers/presentation/bloc/teacher_bloc.dart';
+import './features/payments/presentation/bloc/payment_bloc.dart';
+import './features/reports/presentation/bloc/report_bloc.dart';
 import './features/auth/presentation/pages/login_page.dart';
 import './features/main/presentation/pages/main_layout.dart';
 
@@ -38,6 +42,12 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => TeacherBloc(sl<TeacherRepository>()),
+        ),
+        BlocProvider(
+          create: (context) => PaymentBloc(sl<PaymentRepository>()),
+        ),
+        BlocProvider(
+          create: (context) => ReportBloc(sl<ReportRepository>()),
         ),
       ],
       child: MaterialApp(

@@ -12,6 +12,10 @@ import '../../features/students/data/repositories/student_repository.dart';
 import '../../features/students/presentation/bloc/student_bloc.dart';
 import '../../features/teachers/data/repositories/teacher_repository.dart';
 import '../../features/teachers/presentation/bloc/teacher_bloc.dart';
+import '../../features/payments/data/repositories/payment_repository.dart';
+import '../../features/payments/presentation/bloc/payment_bloc.dart';
+import '../../features/reports/data/repositories/report_repository.dart';
+import '../../features/reports/presentation/bloc/report_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -41,10 +45,20 @@ Future<void> setupLocator() async {
     () => TeacherRepository(sl<ApiService>(), sl<StorageService>()),
   );
 
+  sl.registerLazySingleton<PaymentRepository>(
+    () => PaymentRepository(sl<ApiService>(), sl<StorageService>()),
+  );
+
+  sl.registerLazySingleton<ReportRepository>(
+    () => ReportRepository(sl<ApiService>(), sl<StorageService>()),
+  );
+
   // BLoCs
   sl.registerLazySingleton<AuthBloc>(() => AuthBloc(sl<AuthRepository>()));
   sl.registerLazySingleton<CourseBloc>(() => CourseBloc(sl<CourseRepository>()));
   sl.registerLazySingleton<GroupBloc>(() => GroupBloc(sl<GroupRepository>()));
   sl.registerLazySingleton<StudentBloc>(() => StudentBloc(sl<StudentRepository>()));
   sl.registerLazySingleton<TeacherBloc>(() => TeacherBloc(sl<TeacherRepository>()));
+  sl.registerLazySingleton<PaymentBloc>(() => PaymentBloc(sl<PaymentRepository>()));
+  sl.registerLazySingleton<ReportBloc>(() => ReportBloc(sl<ReportRepository>()));
 }
