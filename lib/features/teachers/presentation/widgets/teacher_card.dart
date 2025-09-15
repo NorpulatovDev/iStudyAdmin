@@ -9,6 +9,7 @@ class TeacherCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onProfile;
 
   const TeacherCard({
     super.key,
@@ -16,6 +17,7 @@ class TeacherCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onProfile,
   });
 
   Color _getSalaryTypeColor() {
@@ -145,7 +147,7 @@ class TeacherCard extends StatelessWidget {
                       ),
                     ),
                     
-                    if (onEdit != null || onDelete != null)
+                    if (onEdit != null || onDelete != null || onProfile != null)
                       PopupMenuButton<String>(
                         icon: Container(
                           padding: const EdgeInsets.all(8),
@@ -161,6 +163,9 @@ class TeacherCard extends StatelessWidget {
                         ),
                         onSelected: (value) {
                           switch (value) {
+                            case 'profile':
+                              onProfile?.call();
+                              break;
                             case 'edit':
                               onEdit?.call();
                               break;
@@ -170,6 +175,17 @@ class TeacherCard extends StatelessWidget {
                           }
                         },
                         itemBuilder: (context) => [
+                          if (onProfile != null)
+                            const PopupMenuItem(
+                              value: 'profile',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.person_outlined, size: 18, color: Colors.green),
+                                  SizedBox(width: 12),
+                                  Text('View Profile'),
+                                ],
+                              ),
+                            ),
                           if (onEdit != null)
                             const PopupMenuItem(
                               value: 'edit',

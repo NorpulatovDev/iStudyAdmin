@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../bloc/teacher_bloc.dart';
 import '../widgets/teacher_card.dart';
 import '../widgets/teacher_form_dialog.dart';
+import '../pages/teacher_profile_page.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../data/repositories/teacher_repository.dart';
 
@@ -548,23 +549,12 @@ class _TeachersPageState extends State<TeachersPage> {
                           final teacher = state.teachers[index];
                           return TeacherCard(
                             teacher: teacher,
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.person,
-                                        color: Colors.white,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text('Viewing ${teacher.fullName}'),
-                                    ],
-                                  ),
-                                  duration: const Duration(seconds: 1),
-                                ),
-                              );
-                            },
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TeacherProfilePage(teacher: teacher),
+                              ),
+                            ),
                             onEdit: () => _editTeacher(teacher),
                             onDelete: () => _deleteTeacher(teacher),
                           );
