@@ -80,7 +80,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       // Add to local cache
       _allCourses.add(newCourse);
       
-      emit(CourseOperationSuccess('Course created successfully'));
+      emit(const CourseOperationSuccess('Course created successfully'));
       
       // Refresh the list
       add(CourseRefreshRequested(branchId: event.branchId));
@@ -132,7 +132,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       // Remove from local cache
       _allCourses.removeWhere((course) => course.id == event.id);
 
-      emit(CourseOperationSuccess('Course deleted successfully'));
+      emit( const CourseOperationSuccess('Course deleted successfully'));
       
       // Refresh the list
       add(CourseRefreshRequested(branchId: _currentBranchId));

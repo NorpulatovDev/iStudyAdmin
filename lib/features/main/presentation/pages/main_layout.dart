@@ -1,9 +1,10 @@
 // lib/features/main/presentation/pages/main_layout.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:istudyadmin/features/courses/presentation/pages/courses_page.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../courses/presentation/pages/course_page.dart';
+// import '../../../courses/presentation/pages/course_page.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../students/presentation/pages/students_page.dart';
 import '../../../teachers/presentation/pages/teachers_page.dart';
@@ -25,7 +26,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> _pages = [
     const DashboardPage(),
-    const CoursePage(),
+    const CoursesScreen(),
     const StudentsPage(),
     const TeachersPage(),
     const GroupsPage(), // Groups from drawer - shows all branch groups
