@@ -7,18 +7,18 @@ part of 'teacher_model.dart';
 // **************************************************************************
 
 TeacherModel _$TeacherModelFromJson(Map<String, dynamic> json) => TeacherModel(
-  id: (json['id'] as num).toInt(),
-  firstName: json['firstName'] as String,
-  lastName: json['lastName'] as String,
-  phoneNumber: json['phoneNumber'] as String?,
-  email: json['email'] as String?,
-  baseSalary: (json['baseSalary'] as num).toDouble(),
-  paymentPercentage: (json['paymentPercentage'] as num).toDouble(),
-  salaryType: json['salaryType'] as String,
-  branchId: (json['branchId'] as num).toInt(),
-  branchName: json['branchName'] as String,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-);
+      id: (json['id'] as num).toInt(),
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      phoneNumber: json['phoneNumber'] as String?,
+      email: json['email'] as String?,
+      baseSalary: (json['baseSalary'] as num).toDouble(),
+      paymentPercentage: (json['paymentPercentage'] as num).toDouble(),
+      salaryType: json['salaryType'] as String,
+      branchId: (json['branchId'] as num).toInt(),
+      branchName: json['branchName'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
 
 Map<String, dynamic> _$TeacherModelToJson(TeacherModel instance) =>
     <String, dynamic>{

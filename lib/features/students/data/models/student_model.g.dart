@@ -7,21 +7,21 @@ part of 'student_model.dart';
 // **************************************************************************
 
 StudentModel _$StudentModelFromJson(Map<String, dynamic> json) => StudentModel(
-  id: (json['id'] as num).toInt(),
-  firstName: json['firstName'] as String,
-  lastName: json['lastName'] as String,
-  phoneNumber: json['phoneNumber'] as String?,
-  branchId: (json['branchId'] as num).toInt(),
-  branchName: json['branchName'] as String,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  hasPaidInMonth: json['hasPaidInMonth'] as bool?,
-  totalPaidInMonth: (json['totalPaidInMonth'] as num?)?.toDouble(),
-  remainingAmount: (json['remainingAmount'] as num?)?.toDouble(),
-  paymentStatus: json['paymentStatus'] as String?,
-  lastPaymentDate: json['lastPaymentDate'] == null
-      ? null
-      : DateTime.parse(json['lastPaymentDate'] as String),
-);
+      id: (json['id'] as num).toInt(),
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      phoneNumber: json['phoneNumber'] as String?,
+      branchId: (json['branchId'] as num).toInt(),
+      branchName: json['branchName'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      hasPaidInMonth: json['hasPaidInMonth'] as bool?,
+      totalPaidInMonth: (json['totalPaidInMonth'] as num?)?.toDouble(),
+      remainingAmount: (json['remainingAmount'] as num?)?.toDouble(),
+      paymentStatus: json['paymentStatus'] as String?,
+      lastPaymentDate: json['lastPaymentDate'] == null
+          ? null
+          : DateTime.parse(json['lastPaymentDate'] as String),
+    );
 
 Map<String, dynamic> _$StudentModelToJson(StudentModel instance) =>
     <String, dynamic>{

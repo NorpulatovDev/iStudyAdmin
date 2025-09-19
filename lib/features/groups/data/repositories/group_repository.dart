@@ -29,7 +29,7 @@ class GroupRepository {
     try {
       final user = await _getCurrentUser();
       final targetBranchId = branchId ?? user?.branchId;
-      
+
       if (targetBranchId == null) {
         throw Exception('Branch ID is required. Please login again.');
       }
@@ -73,11 +73,13 @@ class GroupRepository {
     }
   }
 
-  Future<GroupModel> getGroupById(int id) async {
+  Future<GroupModel> getGroupById(int id, int year, int month) async {
     try {
-      final response = await _apiService.dio.get(
-        '${ApiConstants.groupsEndpoint}/$id',
-      );
+      final response = await _apiService.dio
+          .get('${ApiConstants.groupsEndpoint}/$id', queryParameters: {
+        'year': year,
+        'month': month,
+      });
 
       return GroupModel.fromJson(response.data);
     } on DioException catch (e) {

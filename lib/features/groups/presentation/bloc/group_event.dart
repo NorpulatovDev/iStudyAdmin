@@ -25,6 +25,17 @@ class GroupLoadByCourseRequested extends GroupEvent {
   List<Object> get props => [courseId];
 }
 
+class GroupLoadByIdRequested extends GroupEvent{
+  final int groupId;
+  final int year;
+  final int month;
+
+  const GroupLoadByIdRequested(this.groupId, this.year, this.month);
+
+  @override
+  List<Object?> get props => [groupId, year, month];
+}
+
 class GroupCreateRequested extends GroupEvent {
   final String name;
   final int courseId;

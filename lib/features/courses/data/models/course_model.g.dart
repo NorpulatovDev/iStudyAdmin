@@ -7,18 +7,18 @@ part of 'course_model.dart';
 // **************************************************************************
 
 CourseModel _$CourseModelFromJson(Map<String, dynamic> json) => CourseModel(
-  id: (json['id'] as num).toInt(),
-  name: json['name'] as String,
-  description: json['description'] as String?,
-  price: (json['price'] as num).toDouble(),
-  durationMonths: (json['durationMonths'] as num?)?.toInt(),
-  branchId: (json['branchId'] as num).toInt(),
-  branchName: json['branchName'] as String,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  groups: (json['groups'] as List<dynamic>?)
-      ?.map((e) => GroupModel.fromJson(e as Map<String, dynamic>))
-      .toList(),
-);
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      price: (json['price'] as num).toDouble(),
+      durationMonths: (json['durationMonths'] as num?)?.toInt(),
+      branchId: (json['branchId'] as num).toInt(),
+      branchName: json['branchName'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      groups: (json['groups'] as List<dynamic>?)
+          ?.map((e) => GroupModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
 Map<String, dynamic> _$CourseModelToJson(CourseModel instance) =>
     <String, dynamic>{

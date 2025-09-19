@@ -7,24 +7,25 @@ part of 'report_model.dart';
 // **************************************************************************
 
 ReportModel _$ReportModelFromJson(Map<String, dynamic> json) => ReportModel(
-  type: json['type'] as String,
-  branchId: (json['branchId'] as num?)?.toInt(),
-  date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
-  startDate: json['startDate'] == null
-      ? null
-      : DateTime.parse(json['startDate'] as String),
-  endDate: json['endDate'] == null
-      ? null
-      : DateTime.parse(json['endDate'] as String),
-  year: (json['year'] as num?)?.toInt(),
-  month: (json['month'] as num?)?.toInt(),
-  totalPayments: (json['totalPayments'] as num?)?.toDouble(),
-  totalExpenses: (json['totalExpenses'] as num?)?.toDouble(),
-  totalSalaries: (json['totalSalaries'] as num?)?.toDouble(),
-  totalIncome: (json['totalIncome'] as num?)?.toDouble(),
-  totalCosts: (json['totalCosts'] as num?)?.toDouble(),
-  netProfit: (json['netProfit'] as num?)?.toDouble(),
-);
+      type: json['type'] as String,
+      branchId: (json['branchId'] as num?)?.toInt(),
+      date:
+          json['date'] == null ? null : DateTime.parse(json['date'] as String),
+      startDate: json['startDate'] == null
+          ? null
+          : DateTime.parse(json['startDate'] as String),
+      endDate: json['endDate'] == null
+          ? null
+          : DateTime.parse(json['endDate'] as String),
+      year: (json['year'] as num?)?.toInt(),
+      month: (json['month'] as num?)?.toInt(),
+      totalPayments: (json['totalPayments'] as num?)?.toDouble(),
+      totalExpenses: (json['totalExpenses'] as num?)?.toDouble(),
+      totalSalaries: (json['totalSalaries'] as num?)?.toDouble(),
+      totalIncome: (json['totalIncome'] as num?)?.toDouble(),
+      totalCosts: (json['totalCosts'] as num?)?.toDouble(),
+      netProfit: (json['netProfit'] as num?)?.toDouble(),
+    );
 
 Map<String, dynamic> _$ReportModelToJson(ReportModel instance) =>
     <String, dynamic>{
@@ -54,12 +55,12 @@ DashboardStatsModel _$DashboardStatsModelFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$DashboardStatsModelToJson(
-  DashboardStatsModel instance,
-) => <String, dynamic>{
-  'totalBranches': instance.totalBranches,
-  'totalUsers': instance.totalUsers,
-  'totalStudents': instance.totalStudents,
-  'totalTeachers': instance.totalTeachers,
-  'monthlyRevenue': instance.monthlyRevenue,
-  'totalRevenue': instance.totalRevenue,
-};
+        DashboardStatsModel instance) =>
+    <String, dynamic>{
+      'totalBranches': instance.totalBranches,
+      'totalUsers': instance.totalUsers,
+      'totalStudents': instance.totalStudents,
+      'totalTeachers': instance.totalTeachers,
+      'monthlyRevenue': instance.monthlyRevenue,
+      'totalRevenue': instance.totalRevenue,
+    };

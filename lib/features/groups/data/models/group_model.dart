@@ -1,8 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
 import 'package:equatable/equatable.dart';
-import 'package:istudyadmin/features/students/data/models/student_model.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import 'package:istudyadmin/features/students/data/models/student_model.dart';
 
 part 'group_model.g.dart';
 
@@ -17,7 +18,7 @@ class GroupModel extends Equatable {
   final int branchId;
   final String branchName;
   final DateTime createdAt;
-  final List<StudentModel>? students;
+  final List<StudentInfo>? students;
 
   const GroupModel({
     required this.id,
@@ -52,4 +53,44 @@ class GroupModel extends Equatable {
         createdAt,
         students,
       ];
+}
+
+@JsonSerializable()
+class StudentInfo extends Equatable {
+  final int? studentId;
+  final String? studentName;
+  final String? phoneNumber;
+  final String? parentPhoneNumber;
+  final double? totalPaidInMonth;
+  final double? coursePrice;
+  final double? remainingAmount;
+  final String? paymentStatus;
+
+  const StudentInfo({
+    this.studentId,
+    this.studentName,
+    this.phoneNumber,
+    this.parentPhoneNumber,
+    this.totalPaidInMonth,
+    this.coursePrice,
+    this.remainingAmount,
+    this.paymentStatus,
+  });
+
+  factory StudentInfo.fromJson(Map<String, dynamic> json) =>
+      _$StudentInfoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$StudentInfoToJson(this);
+
+  @override
+  List<Object?> get props => [
+    studentId,
+    studentName,
+    phoneNumber,
+    parentPhoneNumber,
+    totalPaidInMonth,
+    coursePrice,
+    remainingAmount,
+    paymentStatus,
+  ];
 }
