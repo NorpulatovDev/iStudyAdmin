@@ -14,7 +14,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
   CourseBloc(this._courseRepository) : super(CourseInitial()) {
     on<CourseLoadRequested>(_onLoadRequested);
-    on<CourseSearchRequested>(_onSearchRequested);
+    // on<CourseSearchRequested>(_onSearchRequested);
     on<CourseCreateRequested>(_onCreateRequested);
     on<CourseUpdateRequested>(_onUpdateRequested);
     on<CourseDeleteRequested>(_onDeleteRequested);
@@ -39,28 +39,28 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     }
   }
 
-  Future<void> _onSearchRequested(
-    CourseSearchRequested event,
-    Emitter<CourseState> emit,
-  ) async {
-    if (event.query.trim().isEmpty) {
-      // If search is empty, show all courses
-      emit(CourseLoaded(_allCourses));
-      return;
-    }
+  // Future<void> _onSearchRequested(
+  //   CourseSearchRequested event,
+  //   Emitter<CourseState> emit,
+  // ) async {
+  //   if (event.query.trim().isEmpty) {
+  //     // If search is empty, show all courses
+  //     emit(CourseLoaded(_allCourses));
+  //     return;
+  //   }
 
-    emit(CourseLoading());
+  //   emit(CourseLoading());
 
-    try {
-      final courses = await _courseRepository.searchCourses(
-        branchId: event.branchId,
-        name: event.query,
-      );
-      emit(CourseLoaded(courses, isSearchResult: true));
-    } catch (e) {
-      emit(CourseError(e.toString()));
-    }
-  }
+  //   try {
+  //     final courses = await _courseRepository.searchCourses(
+  //       branchId: event.branchId,
+  //       name: event.query,
+  //     );
+  //     emit(CourseLoaded(courses, isSearchResult: true));
+  //   } catch (e) {
+  //     emit(CourseError(e.toString()));
+  //   }
+  // }
 
   Future<void> _onCreateRequested(
     CourseCreateRequested event,

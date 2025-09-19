@@ -17,18 +17,18 @@ class CourseLoadRequested extends CourseEvent {
   List<Object?> get props => [branchId];
 }
 
-class CourseSearchRequested extends CourseEvent {
-  final String query;
-  final int branchId;
+// class CourseSearchRequested extends CourseEvent {
+//   final String query;
+//   final int branchId;
 
-  const CourseSearchRequested({
-    required this.query,
-    required this.branchId,
-  });
+//   const CourseSearchRequested({
+//     required this.query,
+//     required this.branchId,
+//   });
 
-  @override
-  List<Object> get props => [query, branchId];
-}
+//   @override
+//   List<Object> get props => [query, branchId];
+// }
 
 class CourseCreateRequested extends CourseEvent {
   final String name;

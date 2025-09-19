@@ -51,7 +51,7 @@ Future<void> setupLocator() async {
 
   sl.registerLazySingleton<ReportRepository>(
     () => ReportRepository(sl<ApiService>(), sl<StorageService>()),
-  );
+  ); 
 
   // BLoCs
   sl.registerLazySingleton<AuthBloc>(() => AuthBloc(sl<AuthRepository>()));
