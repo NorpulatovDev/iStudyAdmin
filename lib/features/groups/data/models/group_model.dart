@@ -18,6 +18,9 @@ class GroupModel extends Equatable {
   final int branchId;
   final String branchName;
   final DateTime createdAt;
+  final String startTime;
+  final String endTime;
+  final List<String> daysOfWeek;
   final List<StudentInfo>? studentPayments;
 
   const GroupModel({
@@ -30,6 +33,9 @@ class GroupModel extends Equatable {
     required this.branchId,
     required this.branchName,
     required this.createdAt,
+    required this.startTime,
+    required this.endTime,
+    required this.daysOfWeek,
     this.studentPayments,
   });
 
@@ -51,6 +57,9 @@ class GroupModel extends Equatable {
         branchId,
         branchName,
         createdAt,
+        startTime,
+        endTime,
+        daysOfWeek,
         studentPayments,
       ];
 }

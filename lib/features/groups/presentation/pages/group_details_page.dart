@@ -36,10 +36,10 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
     final now = DateTime.now();
     currentYear = widget.initialYear ?? now.year;
     currentMonth = widget.initialMonth ?? now.month;
-    
+
     _yearController.text = currentYear.toString();
     _monthController.text = currentMonth.toString();
-    
+
     _loadGroupDetails();
   }
 
@@ -60,12 +60,12 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
     if (_dateFormKey.currentState?.validate() ?? false) {
       final newYear = int.parse(_yearController.text);
       final newMonth = int.parse(_monthController.text);
-      
+
       setState(() {
         currentYear = newYear;
         currentMonth = newMonth;
       });
-      
+
       _loadGroupDetails();
     }
   }
@@ -389,7 +389,8 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
           child: _buildStatCard(
             icon: Icons.schedule_outlined,
             title: 'Schedule',
-            value: 'Mon, Wed, Fri', // TODO: Use actual schedule from group
+            value: group.daysOfWeek
+                .join(","), // TODO: Use actual schedule from group
             color: Colors.green,
           ),
         ),
@@ -398,7 +399,8 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
           child: _buildStatCard(
             icon: Icons.access_time_outlined,
             title: 'Duration',
-            value: '2 hours', // TODO: Calculate from start/end time
+            value:
+                "${group.startTime}/${group.endTime}", // TODO: Calculate from start/end time
             color: Colors.orange,
           ),
         ),
@@ -548,9 +550,9 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Second row: Date picker fields
                 Row(
                   children: [
@@ -613,7 +615,7 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            
+
                             // Month field
                             Expanded(
                               child: TextFormField(
@@ -652,12 +654,14 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            
+
                             // Apply button
                             ElevatedButton(
                               onPressed: _updateDateAndLoad,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                                backgroundColor: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.1),
                                 foregroundColor: Theme.of(context).primaryColor,
                                 elevation: 0,
                                 padding: const EdgeInsets.symmetric(

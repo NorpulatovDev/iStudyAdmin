@@ -11,6 +11,7 @@ StudentModel _$StudentModelFromJson(Map<String, dynamic> json) => StudentModel(
       firstName: json['firstName'] as String,
       lastName: json['lastName'] as String,
       phoneNumber: json['phoneNumber'] as String?,
+      parentPhoneNumber: json['parentPhoneNumber'] as String?,
       branchId: (json['branchId'] as num).toInt(),
       branchName: json['branchName'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -21,6 +22,9 @@ StudentModel _$StudentModelFromJson(Map<String, dynamic> json) => StudentModel(
       lastPaymentDate: json['lastPaymentDate'] == null
           ? null
           : DateTime.parse(json['lastPaymentDate'] as String),
+      groupIds: (json['groups'] as List<dynamic>?)
+          ?.map((e) => (e['id'] as num).toInt())
+          .toList(),
     );
 
 Map<String, dynamic> _$StudentModelToJson(StudentModel instance) =>
@@ -29,6 +33,7 @@ Map<String, dynamic> _$StudentModelToJson(StudentModel instance) =>
       'firstName': instance.firstName,
       'lastName': instance.lastName,
       'phoneNumber': instance.phoneNumber,
+      'parentPhoneNumber': instance.parentPhoneNumber,
       'branchId': instance.branchId,
       'branchName': instance.branchName,
       'createdAt': instance.createdAt.toIso8601String(),
@@ -37,6 +42,7 @@ Map<String, dynamic> _$StudentModelToJson(StudentModel instance) =>
       'remainingAmount': instance.remainingAmount,
       'paymentStatus': instance.paymentStatus,
       'lastPaymentDate': instance.lastPaymentDate?.toIso8601String(),
+      'groupIds': instance.groupIds,
     };
 
 CreateStudentRequest _$CreateStudentRequestFromJson(
