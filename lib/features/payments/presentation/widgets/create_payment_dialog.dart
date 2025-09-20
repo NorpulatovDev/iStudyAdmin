@@ -27,7 +27,8 @@ class CreatePaymentDialog extends StatefulWidget {
   State<CreatePaymentDialog> createState() => _CreatePaymentDialogState();
 }
 
-class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
+class _CreatePaymentDialogState extends State<CreatePaymentDialog>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -35,7 +36,19 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
   int? _selectedCourseId;
   int? _selectedGroupId;
   int? _selectedStudentId;
+  int _selectedYear = DateTime.now().year;
+  int _selectedMonth = DateTime.now().month;
   bool _isLoading = false;
+  int _currentStep = 0;
+  
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  final List<String> _months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   @override
   void initState() {
@@ -43,26 +56,46 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     _selectedCourseId = widget.preselectedCourseId;
     _selectedGroupId = widget.preselectedGroupId;
     _selectedStudentId = widget.preselectedStudentId;
+    
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    ));
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+    
+    _animationController.forward();
     _loadInitialData();
   }
 
   void _loadInitialData() {
-    // Always load courses first
     context.read<CourseBloc>().add(
       CourseLoadRequested(branchId: widget.branchId),
     );
 
-    // If we have a preselected course, load its groups
     if (_selectedCourseId != null) {
       context.read<GroupBloc>().add(
-        GroupLoadByCourseRequested( _selectedCourseId!),
+        GroupLoadByCourseRequested(_selectedCourseId!),
       );
     }
 
-    // If we have a preselected group, load its students
     if (_selectedGroupId != null) {
       context.read<StudentBloc>().add(
-        StudentLoadByGroupRequested( _selectedGroupId!),
+        StudentLoadByGroupRequested(_selectedGroupId!),
       );
     }
   }
@@ -70,46 +103,40 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
   void _onCourseSelected(int courseId) {
     setState(() {
       _selectedCourseId = courseId;
-      _selectedGroupId = null; // Reset group selection
-      _selectedStudentId = null; // Reset student selection
+      _selectedGroupId = null;
+      _selectedStudentId = null;
+      _currentStep = 1;
     });
     
-    // Load groups for the selected course
     context.read<GroupBloc>().add(
-      GroupLoadByCourseRequested( courseId),
+      GroupLoadByCourseRequested(courseId),
     );
-    
-    // Auto-fill amount with course price
-    final courseState = context.read<CourseBloc>().state;
-    if (courseState is CourseLoaded) {
-      final selectedCourse = courseState.courses.firstWhere(
-        (course) => course.id == courseId,
-      );
-      _amountController.text = selectedCourse.price.toStringAsFixed(2);
-    }
   }
 
   void _onGroupSelected(int groupId) {
     setState(() {
       _selectedGroupId = groupId;
-      _selectedStudentId = null; // Reset student selection
+      _selectedStudentId = null;
+      _currentStep = 2;
     });
     
-    // Load students for the selected group
     context.read<StudentBloc>().add(
-      StudentLoadByGroupRequested( groupId),
+      StudentLoadByGroupRequested(groupId),
     );
+  }
+
+  void _onStudentSelected(int studentId) {
+    setState(() {
+      _selectedStudentId = studentId;
+      _currentStep = 3;
+    });
   }
 
   void _createPayment() async {
     if (!_formKey.currentState!.validate()) return;
+    
     if (_selectedCourseId == null || _selectedGroupId == null || _selectedStudentId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select course, group, and student'),
-          backgroundColor: AppTheme.errorColor,
-        ),
-      );
+      _showErrorSnackBar('Please complete all selections');
       return;
     }
 
@@ -119,7 +146,6 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
 
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     final description = _descriptionController.text.trim();
-    final now = DateTime.now();
 
     final request = CreatePaymentRequest(
       studentId: _selectedStudentId!,
@@ -127,8 +153,8 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
       amount: amount,
       branchId: widget.branchId,
       description: description.isNotEmpty ? description : null,
-      paymentYear: now.year,
-      paymentMonth: now.month,
+      paymentYear: _selectedYear,
+      paymentMonth: _selectedMonth,
     );
 
     context.read<PaymentBloc>().add(
@@ -136,101 +162,151 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     );
   }
 
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(child: Text(message)),
+            ],
+          ),
+          backgroundColor: Colors.red[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<PaymentBloc, PaymentState>(
       listener: (context, state) {
         if (state is PaymentOperationSuccess) {
-          setState(() {
-            _isLoading = false;
-          });
+          setState(() => _isLoading = false);
           Navigator.of(context).pop();
-        } else if (state is PaymentError) {
-          setState(() {
-            _isLoading = false;
-          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppTheme.errorColor,
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 8),
+                  const Text('Payment created successfully!'),
+                ],
+              ),
+              backgroundColor: Colors.green[600],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              margin: const EdgeInsets.all(16),
             ),
           );
+        } else if (state is PaymentError) {
+          setState(() => _isLoading = false);
+          _showErrorSnackBar(state.message);
+        } else if (state is PaymentOperationLoading) {
+          setState(() => _isLoading = true);
         }
       },
-      child: Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.all(16),
+            child: Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(maxWidth: 480, maxHeight: 700),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white,
+                    Colors.grey[50]!,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.payment,
-                          color: AppTheme.primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text(
-                          'Add New Payment',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Step Indicator
+                  // Header with gradient
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppTheme.primaryColor.withOpacity(0.1),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.primaryColor,
+                          AppTheme.primaryColor.withOpacity(0.8),
+                        ],
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: AppTheme.primaryColor,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.payments_rounded,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 16),
                         Expanded(
-                          child: Text(
-                            'Follow the steps: Course → Group → Student',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.primaryColor,
-                              fontWeight: FontWeight.w500,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Create Payment',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Add a new payment record',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 20,
                             ),
                           ),
                         ),
@@ -238,442 +314,309 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
                     ),
                   ),
                   
-                  const SizedBox(height: 20),
-                  
-                  // Step 1: Course Selection
-                  Row(
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: _selectedCourseId != null 
-                              ? AppTheme.successColor 
-                              : AppTheme.primaryColor,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: _selectedCourseId != null
-                              ? const Icon(Icons.check, color: Colors.white, size: 14)
-                              : const Text(
-                                  '1',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Select Course',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  BlocBuilder<CourseBloc, CourseState>(
-                    builder: (context, state) {
-                      if (state is CourseLoading) {
-                        return _buildLoadingDropdown('Loading courses...');
-                      }
-                      
-                      if (state is CourseLoaded) {
-                        return DropdownButtonFormField<int>(
-                          value: _selectedCourseId,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                  // Progress indicator
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Row(
+                      children: List.generate(4, (index) {
+                        final isActive = index <= _currentStep;
+                        final isCompleted = index < _currentStep;
+                        
+                        return Expanded(
+                          child: Container(
+                            margin: EdgeInsets.only(right: index < 3 ? 8 : 0),
+                            height: 4,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(2),
+                              color: isActive 
+                                  ? (isCompleted ? Colors.green : AppTheme.primaryColor)
+                                  : Colors.grey[300],
                             ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            hintText: 'Choose a course first',
                           ),
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a course';
-                            }
-                            return null;
-                          },
-                          items: state.courses.map((course) {
-                            return DropdownMenuItem<int>(
-                              value: course.id,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                        );
+                      }),
+                    ),
+                  ),
+                  
+                  // Content
+                  Expanded(
+                    child: Form(
+                      key: _formKey,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Payment Period Section
+                            _buildSectionCard(
+                              title: 'Payment Period',
+                              icon: Icons.calendar_month,
+                              color: Colors.blue,
+                              child: Row(
                                 children: [
-                                  Text(
-                                    course.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
+                                  Expanded(
+                                    child: _buildDropdownField(
+                                      label: 'Year',
+                                      value: _selectedYear,
+                                      items: List.generate(5, (index) {
+                                        final year = DateTime.now().year - index;
+                                        return DropdownMenuItem(
+                                          value: year,
+                                          child: Text(year.toString()),
+                                        );
+                                      }),
+                                      onChanged: _isLoading ? null : (value) {
+                                        setState(() => _selectedYear = value! as int);
+                                      },
                                     ),
                                   ),
-                                  Text(
-                                    '\$${course.price.toStringAsFixed(2)}',
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildDropdownField(
+                                      label: 'Month',
+                                      value: _selectedMonth,
+                                      items: List.generate(12, (index) {
+                                        return DropdownMenuItem(
+                                          value: index + 1,
+                                          child: Text(_months[index]),
+                                        );
+                                      }),
+                                      onChanged: _isLoading ? null : (value) {
+                                        setState(() => _selectedMonth = value! as int);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            
+                            // Course Selection
+                            _buildSectionCard(
+                              title: 'Step 1: Select Course',
+                              icon: Icons.school,
+                              color: _selectedCourseId != null ? Colors.green : AppTheme.primaryColor,
+                              child: BlocBuilder<CourseBloc, CourseState>(
+                                builder: (context, state) {
+                                  if (state is CourseLoading) {
+                                    return _buildLoadingWidget('Loading courses...');
+                                  }
+                                  
+                                  if (state is CourseLoaded) {
+                                    if (state.courses.isEmpty) {
+                                      return _buildErrorWidget('No courses available');
+                                    }
+                                    
+                                    return _buildCourseGrid(state.courses);
+                                  }
+                                  
+                                  if (state is CourseError) {
+                                    return _buildErrorWidget('Failed to load courses');
+                                  }
+                                  
+                                  return _buildErrorWidget('Failed to load courses');
+                                },
+                              ),
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            
+                            // Group Selection
+                            if (_selectedCourseId != null) ...[
+                              _buildSectionCard(
+                                title: 'Step 2: Select Group',
+                                icon: Icons.group,
+                                color: _selectedGroupId != null ? Colors.green : AppTheme.primaryColor,
+                                child: BlocBuilder<GroupBloc, GroupState>(
+                                  builder: (context, state) {
+                                    if (state is GroupLoading) {
+                                      return _buildLoadingWidget('Loading groups...');
+                                    }
+                                    
+                                    if (state is GroupLoaded) {
+                                      if (state.groups.isEmpty) {
+                                        return _buildErrorWidget('No groups available');
+                                      }
+                                      
+                                      return _buildGroupGrid(state.groups);
+                                    }
+                                    
+                                    if (state is GroupError) {
+                                      return _buildErrorWidget('Failed to load groups');
+                                    }
+                                    
+                                    return _buildLoadingWidget('Select a course first');
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            
+                            // Student Selection
+                            if (_selectedGroupId != null) ...[
+                              _buildSectionCard(
+                                title: 'Step 3: Select Student',
+                                icon: Icons.person,
+                                color: _selectedStudentId != null ? Colors.green : AppTheme.primaryColor,
+                                child: BlocBuilder<StudentBloc, StudentState>(
+                                  builder: (context, state) {
+                                    if (state is StudentLoading) {
+                                      return _buildLoadingWidget('Loading students...');
+                                    }
+                                    
+                                    if (state is StudentLoaded) {
+                                      if (state.students.isEmpty) {
+                                        return _buildErrorWidget('No students in this group');
+                                      }
+                                      
+                                      return _buildStudentGrid(state.students);
+                                    }
+                                    
+                                    if (state is StudentError) {
+                                      return _buildErrorWidget('Failed to load students');
+                                    }
+                                    
+                                    return _buildLoadingWidget('Loading students...');
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            
+                            // Payment Details
+                            if (_selectedStudentId != null) ...[
+                              _buildSectionCard(
+                                title: 'Payment Details',
+                                icon: Icons.attach_money,
+                                color: Colors.orange,
+                                child: Column(
+                                  children: [
+                                    TextFormField(
+                                      controller: _amountController,
+                                      keyboardType: TextInputType.number,
+                                      enabled: !_isLoading,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                      ],
+                                      decoration: InputDecoration(
+                                        labelText: 'Payment Amount',
+                                        prefixText: '\$ ',
+                                        hintText: '0.00',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                            color: AppTheme.primaryColor,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.grey[50],
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter an amount';
+                                        }
+                                        final amount = double.tryParse(value);
+                                        if (amount == null || amount <= 0) {
+                                          return 'Please enter a valid amount';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                    TextFormField(
+                                      controller: _descriptionController,
+                                      maxLines: 3,
+                                      enabled: !_isLoading,
+                                      decoration: InputDecoration(
+                                        labelText: 'Description (Optional)',
+                                        hintText: 'Enter payment description...',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                            color: AppTheme.primaryColor,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.grey[50],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  // Footer
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: BorderSide(color: Colors.grey[400]!),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isLoading || _selectedStudentId == null ? null : _createPayment,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Create Payment',
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.successColor,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: widget.preselectedCourseId != null 
-                              ? null 
-                              : (value) {
-                                  if (value != null) {
-                                    _onCourseSelected(value);
-                                  }
-                                },
-                        );
-                      }
-                      
-                      return _buildErrorDropdown('Failed to load courses');
-                    },
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Step 2: Group Selection
-                  Row(
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: _selectedGroupId != null 
-                              ? AppTheme.successColor 
-                              : (_selectedCourseId != null 
-                                  ? AppTheme.primaryColor 
-                                  : Colors.grey[400]),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: _selectedGroupId != null
-                              ? const Icon(Icons.check, color: Colors.white, size: 14)
-                              : const Text(
-                                  '2',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Select Group',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  BlocBuilder<GroupBloc, GroupState>(
-                    builder: (context, state) {
-                      if (_selectedCourseId == null) {
-                        return _buildDisabledDropdown('Select a course first');
-                      }
-                      
-                      if (state is GroupLoading) {
-                        return _buildLoadingDropdown('Loading groups...');
-                      }
-                      
-                      if (state is GroupLoaded) {
-                        if (state.groups.isEmpty) {
-                          return _buildErrorDropdown('No groups available for this course');
-                        }
-                        
-                        return DropdownButtonFormField<int>(
-                          value: _selectedGroupId,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            hintText: 'Choose a group',
                           ),
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a group';
-                            }
-                            return null;
-                          },
-                          items: state.groups.map((group) {
-                            return DropdownMenuItem<int>(
-                              value: group.id,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    group.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  // if (group.description != null)
-                                  //   Text(
-                                  //     group.description!,
-                                  //     style: TextStyle(
-                                  //       fontSize: 12,
-                                  //       color: Colors.grey[600],
-                                  //     ),
-                                  //   ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: widget.preselectedGroupId != null 
-                              ? null 
-                              : (value) {
-                                  if (value != null) {
-                                    _onGroupSelected(value);
-                                  }
-                                },
-                        );
-                      }
-                      
-                      if (state is GroupError) {
-                        return _buildErrorDropdown('Failed to load groups');
-                      }
-                      
-                      return _buildDisabledDropdown('Select a course first');
-                    },
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Step 3: Student Selection
-                  Row(
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: _selectedStudentId != null 
-                              ? AppTheme.successColor 
-                              : (_selectedGroupId != null 
-                                  ? AppTheme.primaryColor 
-                                  : Colors.grey[400]),
-                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Center(
-                          child: _selectedStudentId != null
-                              ? const Icon(Icons.check, color: Colors.white, size: 14)
-                              : const Text(
-                                  '3',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Select Student',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  BlocBuilder<StudentBloc, StudentState>(
-                    builder: (context, state) {
-                      if (_selectedGroupId == null) {
-                        return _buildDisabledDropdown('Select a group first');
-                      }
-                      
-                      if (state is StudentLoading) {
-                        return _buildLoadingDropdown('Loading students...');
-                      }
-                      
-                      if (state is StudentLoaded) {
-                        if (state.students.isEmpty) {
-                          return _buildErrorDropdown('No students in this group');
-                        }
-                        
-                        return DropdownButtonFormField<int>(
-                          value: _selectedStudentId,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            hintText: 'Choose a student',
-                          ),
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a student';
-                            }
-                            return null;
-                          },
-                          items: state.students.map((student) {
-                            return DropdownMenuItem<int>(
-                              value: student.id,
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 12,
-                                    backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-                                    child: Text(
-                                      '${student.firstName[0]}${student.lastName[0]}',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      '${student.firstName} ${student.lastName}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: widget.preselectedStudentId != null 
-                              ? null 
-                              : (value) {
-                                  setState(() {
-                                    _selectedStudentId = value;
-                                  });
-                                },
-                        );
-                      }
-                      
-                      if (state is StudentError) {
-                        return _buildErrorDropdown('Failed to load students');
-                      }
-                      
-                      return _buildDisabledDropdown('Select a group first');
-                    },
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Amount Field
-                  const Text(
-                    'Payment Amount',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _amountController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                    ],
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixText: '\$ ',
-                      hintText: '0.00',
-                      suffixIcon: const Icon(Icons.attach_money),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter an amount';
-                      }
-                      final amount = double.tryParse(value);
-                      if (amount == null || amount <= 0) {
-                        return 'Please enter a valid amount';
-                      }
-                      return null;
-                    },
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Description Field (Optional)
-                  const Text(
-                    'Description (Optional)',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _descriptionController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      hintText: 'Enter payment description...',
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: _isLoading 
-                              ? null 
-                              : () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _createPayment,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : const Text('Create Payment'),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -684,70 +627,349 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
     );
   }
 
-  Widget _buildLoadingDropdown(String text) {
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required Widget child,
+  }) {
     return Container(
-      height: 56,
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          const SizedBox(width: 12),
-          Text(text),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: child,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildErrorDropdown(String text) {
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.red[300]!),
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.red[50],
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error, color: Colors.red, size: 16),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(color: Colors.red),
+  Widget _buildDropdownField<T>({
+    required String label,
+    required T value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?>? onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<T>(
+          value: value,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            filled: true,
+            fillColor: Colors.grey[50],
+          ),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCourseGrid(List courses) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: courses.length,
+      itemBuilder: (context, index) {
+        final course = courses[index];
+        final isSelected = _selectedCourseId == course.id;
+        
+        return GestureDetector(
+          onTap: _isLoading ? null : () => _onCourseSelected(course.id),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isSelected
+                    ? [Colors.green, Colors.green.withOpacity(0.8)]
+                    : [Colors.grey[50]!, Colors.grey[100]!],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? Colors.green : Colors.grey[300]!,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.school,
+                        color: isSelected ? Colors.white : Colors.grey[600],
+                        size: 16,
+                      ),
+                      const Spacer(),
+                      if (isSelected)
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Text(
+                    course.name,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? Colors.white : Colors.black87,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$${course.price.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isSelected ? Colors.white70 : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGroupGrid(List groups) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: groups.map<Widget>((group) {
+        final isSelected = _selectedGroupId == group.id;
+        
+        return GestureDetector(
+          onTap: _isLoading ? null : () => _onGroupSelected(group.id),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isSelected
+                    ? [Colors.green, Colors.green.withOpacity(0.8)]
+                    : [Colors.grey[50]!, Colors.grey[100]!],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isSelected ? Colors.green : Colors.grey[300]!,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.group,
+                  color: isSelected ? Colors.white : Colors.grey[600],
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  group.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isSelected ? Colors.white : Colors.black87,
+                  ),
+                ),
+                if (isSelected) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildStudentGrid(List students) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: students.length,
+      itemBuilder: (context, index) {
+        final student = students[index];
+        final isSelected = _selectedStudentId == student.id;
+        
+        return GestureDetector(
+          onTap: _isLoading ? null : () => _onStudentSelected(student.id),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isSelected
+                    ? [Colors.green, Colors.green.withOpacity(0.8)]
+                    : [Colors.grey[50]!, Colors.grey[100]!],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? Colors.green : Colors.grey[300]!,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: isSelected 
+                      ? Colors.white.withOpacity(0.2)
+                      : AppTheme.primaryColor.withOpacity(0.1),
+                  child: Text(
+                    student.firstName.isNotEmpty && student.lastName.isNotEmpty
+                        ? '${student.firstName[0]}${student.lastName[0]}'
+                        : 'S',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : AppTheme.primaryColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '${student.firstName} ${student.lastName}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLoadingWidget(String message) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDisabledDropdown(String text) {
+  Widget _buildErrorWidget(String message) {
     return Container(
-      height: 56,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.grey[50],
-      ),
-      child: Row(
+      padding: const EdgeInsets.all(24),
+      child: Column(
         children: [
-          Icon(Icons.info, color: Colors.grey[500], size: 16),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(color: Colors.grey[600]),
+          Icon(
+            Icons.error_outline,
+            color: Colors.red[400],
+            size: 48,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.red[600],
+              fontWeight: FontWeight.w500,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -756,6 +978,7 @@ class _CreatePaymentDialogState extends State<CreatePaymentDialog> {
 
   @override
   void dispose() {
+    _animationController.dispose();
     _amountController.dispose();
     _descriptionController.dispose();
     super.dispose();

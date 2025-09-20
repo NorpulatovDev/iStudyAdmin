@@ -36,7 +36,7 @@ class _MainLayoutState extends State<MainLayout> {
   ];
 
   final List<String> _pageTitles = [
-    'Dashboard',
+    // 'Dashboard',
     'Courses',
     'Students',
     'Teachers',

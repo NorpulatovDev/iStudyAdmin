@@ -33,17 +33,17 @@ class _PaymentsPageState extends State<PaymentsPage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentBranchId = authState.user.branchId;
-      
+
       if (widget.studentId != null) {
         // Load payments for specific student
         context.read<PaymentBloc>().add(
-          PaymentLoadByStudentRequested(widget.studentId!),
-        );
+              PaymentLoadByStudentRequested(widget.studentId!),
+            );
       } else {
         // Load all payments for branch
         context.read<PaymentBloc>().add(
-          PaymentLoadByBranchRequested(branchId: _currentBranchId),
-        );
+              PaymentLoadByBranchRequested(branchId: _currentBranchId),
+            );
       }
     }
   }
@@ -81,18 +81,18 @@ class _PaymentsPageState extends State<PaymentsPage> {
     }
 
     context.read<PaymentBloc>().add(
-      PaymentSearchRequested(
-        branchId: _currentBranchId!,
-        studentName: query,
-      ),
-    );
+          PaymentSearchRequested(
+            branchId: _currentBranchId!,
+            studentName: query,
+          ),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: widget.studentId != null 
+      appBar: widget.studentId != null
           ? AppBar(
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,15 +123,15 @@ class _PaymentsPageState extends State<PaymentsPage> {
                   icon: const Icon(Icons.refresh),
                   onPressed: () {
                     context.read<PaymentBloc>().add(
-                      PaymentRefreshRequested(studentId: widget.studentId),
-                    );
+                          PaymentRefreshRequested(studentId: widget.studentId),
+                        );
                   },
                   tooltip: 'Refresh payments',
                 ),
               ],
             )
           : null, // No appbar if from drawer (MainLayout handles it)
-      
+
       body: Column(
         children: [
           // Search and Filter Bar
@@ -145,7 +145,8 @@ class _PaymentsPageState extends State<PaymentsPage> {
                   controller: _searchController,
                   decoration: InputDecoration(
                     hintText: 'Search by student name...',
-                    prefixIcon: const Icon(Icons.search, color: AppTheme.primaryColor),
+                    prefixIcon:
+                        const Icon(Icons.search, color: AppTheme.primaryColor),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear),
@@ -165,16 +166,17 @@ class _PaymentsPageState extends State<PaymentsPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppTheme.primaryColor),
+                      borderSide:
+                          const BorderSide(color: AppTheme.primaryColor),
                     ),
                     filled: true,
                     fillColor: Colors.grey.shade50,
                   ),
                   onChanged: _performSearch,
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Filter and Add Payment Row
                 Row(
                   children: [
@@ -190,16 +192,17 @@ class _PaymentsPageState extends State<PaymentsPage> {
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.primaryColor,
-                            side: const BorderSide(color: AppTheme.primaryColor),
+                            side:
+                                const BorderSide(color: AppTheme.primaryColor),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                         ),
                       ),
-                    
+
                     if (widget.studentId == null) const SizedBox(width: 12),
-                    
+
                     // Add Payment Button
                     ElevatedButton.icon(
                       onPressed: _showCreatePaymentDialog,
@@ -244,7 +247,8 @@ class _PaymentsPageState extends State<PaymentsPage> {
               },
               child: BlocBuilder<PaymentBloc, PaymentState>(
                 builder: (context, state) {
-                  if (state is PaymentLoading || state is PaymentOperationLoading) {
+                  if (state is PaymentLoading ||
+                      state is PaymentOperationLoading) {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -340,7 +344,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
                               ),
                               const SizedBox(height: 20),
                               Text(
-                                widget.studentId != null 
+                                widget.studentId != null
                                     ? 'No payments found'
                                     : 'No payments yet',
                                 style: const TextStyle(
@@ -410,7 +414,7 @@ class _PaymentsPageState extends State<PaymentsPage> {
                                       ),
                                     ),
                                     Text(
-                                      'Total: \${state.payments.fold<double>(0, (sum, payment) => sum + payment.amount).toStringAsFixed(2)}',
+                                      'Total: ${state.payments.fold<double>(0, (sum, payment) => sum + payment.amount).toStringAsFixed(2)}',
                                       style: TextStyle(
                                         color: Colors.grey[600],
                                         fontSize: 12,
@@ -429,12 +433,14 @@ class _PaymentsPageState extends State<PaymentsPage> {
                             onRefresh: () async {
                               if (widget.studentId != null) {
                                 context.read<PaymentBloc>().add(
-                                  PaymentRefreshRequested(studentId: widget.studentId),
-                                );
+                                      PaymentRefreshRequested(
+                                          studentId: widget.studentId),
+                                    );
                               } else {
                                 context.read<PaymentBloc>().add(
-                                  PaymentRefreshRequested(branchId: _currentBranchId),
-                                );
+                                      PaymentRefreshRequested(
+                                          branchId: _currentBranchId),
+                                    );
                               }
                             },
                             color: AppTheme.primaryColor,
