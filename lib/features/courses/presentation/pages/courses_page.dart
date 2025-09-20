@@ -508,13 +508,17 @@ class _CoursesPageState extends State<CoursesPage> {
     );
   }
 
-  void _navigateToCourseDetails(CourseModel course) {
-    Navigator.push(
+  void _navigateToCourseDetails(CourseModel course) async {
+    // Navigate to course details and wait for result
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CourseDetailsPage(courseId: course.id),
       ),
     );
+    
+    // Refresh courses when returning from course details
+    context.read<CourseBloc>().add(CourseLoadRequested(branchId: widget.branchId));
   }
 
   void _refreshCourses() {
