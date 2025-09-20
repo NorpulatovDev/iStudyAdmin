@@ -132,19 +132,10 @@ class StudentRepository {
   }
 
   Future<StudentModel> createStudent({
-    required String firstName,
-    required String lastName,
-    required int branchId,
-    String? phoneNumber,
+    required CreateStudentRequest request
   }) async {
     try {
-      final data = {
-        'firstName': firstName,
-        'lastName': lastName,
-        'branchId': branchId,
-        if (phoneNumber != null && phoneNumber.isNotEmpty)
-          'phoneNumber': phoneNumber,
-      };
+      final data = request.toJson();
 
       final response = await _apiService.dio.post(
         ApiConstants.studentsEndpoint,
@@ -172,19 +163,10 @@ class StudentRepository {
 
   Future<StudentModel> updateStudent({
     required int id,
-    required String firstName,
-    required String lastName,
-    required int branchId,
-    String? phoneNumber,
+    required CreateStudentRequest request
   }) async {
     try {
-      final data = {
-        'firstName': firstName,
-        'lastName': lastName,
-        'branchId': branchId,
-        if (phoneNumber != null && phoneNumber.isNotEmpty)
-          'phoneNumber': phoneNumber,
-      };
+      final data = request.toJson();
 
       final response = await _apiService.dio.put(
         '${ApiConstants.studentsEndpoint}/$id',

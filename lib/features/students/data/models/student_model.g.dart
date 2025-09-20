@@ -38,3 +38,27 @@ Map<String, dynamic> _$StudentModelToJson(StudentModel instance) =>
       'paymentStatus': instance.paymentStatus,
       'lastPaymentDate': instance.lastPaymentDate?.toIso8601String(),
     };
+
+CreateStudentRequest _$CreateStudentRequestFromJson(
+        Map<String, dynamic> json) =>
+    CreateStudentRequest(
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      phoneNumber: json['phoneNumber'] as String,
+      parentPhoneNumber: json['parentPhoneNumber'] as String,
+      branchId: (json['branchId'] as num).toInt(),
+      groupIds: (json['groupIds'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList(),
+    );
+
+Map<String, dynamic> _$CreateStudentRequestToJson(
+        CreateStudentRequest instance) =>
+    <String, dynamic>{
+      'firstName': instance.firstName,
+      'lastName': instance.lastName,
+      'phoneNumber': instance.phoneNumber,
+      'parentPhoneNumber': instance.parentPhoneNumber,
+      'branchId': instance.branchId,
+      'groupIds': instance.groupIds,
+    };

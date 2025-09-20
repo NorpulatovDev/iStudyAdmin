@@ -39,39 +39,27 @@ class StudentSearchRequested extends StudentEvent {
 }
 
 class StudentCreateRequested extends StudentEvent {
-  final String firstName;
-  final String lastName;
-  final int branchId;
-  final String? phoneNumber;
+  final CreateStudentRequest request;
 
   const StudentCreateRequested({
-    required this.firstName,
-    required this.lastName,
-    required this.branchId,
-    this.phoneNumber,
+    required this.request
   });
 
   @override
-  List<Object?> get props => [firstName, lastName, branchId, phoneNumber];
+  List<Object?> get props => [request];
 }
 
 class StudentUpdateRequested extends StudentEvent {
   final int id;
-  final String firstName;
-  final String lastName;
-  final int branchId;
-  final String? phoneNumber;
+  final CreateStudentRequest request;
 
   const StudentUpdateRequested({
     required this.id,
-    required this.firstName,
-    required this.lastName,
-    required this.branchId,
-    this.phoneNumber,
+    required this.request
   });
 
   @override
-  List<Object?> get props => [id, firstName, lastName, branchId, phoneNumber];
+  List<Object?> get props => [request,id];
 }
 
 class StudentDeleteRequested extends StudentEvent {

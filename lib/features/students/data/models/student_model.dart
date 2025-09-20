@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-
 part 'student_model.g.dart';
 
 @JsonSerializable()
@@ -56,5 +55,36 @@ class StudentModel extends Equatable {
         remainingAmount,
         paymentStatus,
         lastPaymentDate,
+      ];
+}
+
+@JsonSerializable()
+class CreateStudentRequest extends Equatable {
+  final String firstName;
+  final String lastName;
+  final String phoneNumber;
+  final String parentPhoneNumber;
+  final int branchId;
+  final List<int>? groupIds; // nullable now
+
+  const CreateStudentRequest({
+    required this.firstName,
+    required this.lastName,
+    required this.phoneNumber,
+    required this.parentPhoneNumber,
+    required this.branchId,
+    this.groupIds, // optional
+  });
+
+  Map<String, dynamic> toJson() => _$CreateStudentRequestToJson(this);
+
+  @override
+  List<Object?> get props => [
+        firstName,
+        lastName,
+        phoneNumber,
+        parentPhoneNumber,
+        branchId,
+        groupIds,
       ];
 }

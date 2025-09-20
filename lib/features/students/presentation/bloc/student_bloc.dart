@@ -28,7 +28,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     emit(StudentLoading());
 
     try {
-      final students = await _studentRepository.getStudentsByBranch(event.branchId);
+      final students =
+          await _studentRepository.getStudentsByBranch(event.branchId);
       _allStudents = students;
       emit(StudentLoaded(students, loadedBy: 'branch'));
     } catch (e) {
@@ -43,7 +44,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     emit(StudentLoading());
 
     try {
-      final students = await _studentRepository.getStudentsByGroup(event.groupId);
+      final students =
+          await _studentRepository.getStudentsByGroup(event.groupId);
       _allStudents = students;
       emit(StudentLoaded(students, loadedBy: 'group'));
     } catch (e) {
@@ -83,15 +85,11 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     emit(StudentOperationLoading());
 
     try {
-      final newStudent = await _studentRepository.createStudent(
-        firstName: event.firstName,
-        lastName: event.lastName,
-        branchId: event.branchId,
-        phoneNumber: event.phoneNumber,
-      );
+      final newStudent =
+          await _studentRepository.createStudent(request: event.request);
 
       _allStudents.add(newStudent);
-      emit(StudentOperationSuccess('Student created successfully'));
+      emit(const StudentOperationSuccess('Student created successfully'));
       emit(StudentLoaded(_allStudents, loadedBy: 'branch'));
     } catch (e) {
       emit(StudentError(e.toString()));
@@ -107,18 +105,16 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     try {
       final updatedStudent = await _studentRepository.updateStudent(
         id: event.id,
-        firstName: event.firstName,
-        lastName: event.lastName,
-        branchId: event.branchId,
-        phoneNumber: event.phoneNumber,
+        request: event.request,
       );
 
-      final index = _allStudents.indexWhere((student) => student.id == event.id);
+      final index =
+          _allStudents.indexWhere((student) => student.id == event.id);
       if (index != -1) {
         _allStudents[index] = updatedStudent;
       }
 
-      emit(StudentOperationSuccess('Student updated successfully'));
+      emit(const StudentOperationSuccess('Student updated successfully'));
       emit(StudentLoaded(_allStudents, loadedBy: 'branch'));
     } catch (e) {
       emit(StudentError(e.toString()));
@@ -134,7 +130,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     try {
       await _studentRepository.deleteStudent(event.id);
       _allStudents.removeWhere((student) => student.id == event.id);
-      
+
       emit(StudentOperationSuccess('Student deleted successfully'));
       emit(StudentLoaded(_allStudents, loadedBy: 'branch'));
     } catch (e) {
@@ -149,7 +145,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     try {
       List<StudentModel> students;
       String loadedBy;
-      
+
       if (event.groupId != null) {
         students = await _studentRepository.getStudentsByGroup(event.groupId!);
         loadedBy = 'group';
@@ -157,7 +153,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
         students = await _studentRepository.getStudentsByBranch(event.branchId);
         loadedBy = 'branch';
       }
-      
+
       _allStudents = students;
       emit(StudentLoaded(students, loadedBy: loadedBy));
     } catch (e) {
