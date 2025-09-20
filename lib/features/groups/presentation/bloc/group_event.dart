@@ -42,6 +42,9 @@ class GroupCreateRequested extends GroupEvent {
   final int branchId;
   final int? teacherId;
   final List<int>? studentIds;
+  final String? startTime;
+  final String? endTime;
+  final List<String>? daysOfWeek;
 
   const GroupCreateRequested({
     required this.name,
@@ -49,10 +52,13 @@ class GroupCreateRequested extends GroupEvent {
     required this.branchId,
     this.teacherId,
     this.studentIds,
+    this.startTime,
+    this.endTime,
+    this.daysOfWeek,
   });
 
   @override
-  List<Object?> get props => [name, courseId, branchId, teacherId, studentIds];
+  List<Object?> get props => [name, courseId, branchId, teacherId, studentIds, startTime, endTime, daysOfWeek];
 }
 
 class GroupUpdateRequested extends GroupEvent {
@@ -62,6 +68,9 @@ class GroupUpdateRequested extends GroupEvent {
   final int branchId;
   final int? teacherId;
   final List<int>? studentIds;
+  final String? startTime;
+  final String? endTime;
+  final List<String>? daysOfWeek;
 
   const GroupUpdateRequested({
     required this.id,
@@ -70,10 +79,13 @@ class GroupUpdateRequested extends GroupEvent {
     required this.branchId,
     this.teacherId,
     this.studentIds,
+    this.startTime,
+    this.endTime,
+    this.daysOfWeek,
   });
 
   @override
-  List<Object?> get props => [id, name, courseId, branchId, teacherId, studentIds];
+  List<Object?> get props => [id, name, courseId, branchId, teacherId, studentIds, startTime, endTime, daysOfWeek];
 }
 
 class GroupDeleteRequested extends GroupEvent {
@@ -93,4 +105,17 @@ class GroupRefreshRequested extends GroupEvent {
 
   @override
   List<Object?> get props => [branchId, courseId];
+}
+
+class GroupRemoveStudentRequested extends GroupEvent {
+  final int groupId;
+  final int studentId;
+
+  const GroupRemoveStudentRequested({
+    required this.groupId,
+    required this.studentId,
+  });
+
+  @override
+  List<Object> get props => [groupId, studentId];
 }

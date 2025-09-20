@@ -22,6 +22,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     on<GroupUpdateRequested>(_onUpdateRequested);
     on<GroupDeleteRequested>(_onDeleteRequested);
     on<GroupRefreshRequested>(_onRefreshRequested);
+    on<GroupRemoveStudentRequested>(_onRemoveStudentRequested);
   }
 
   // Future<void> _onLoadByBranch(
@@ -55,22 +56,22 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   // }
 
   Future<void> _onLoadById(
-  GroupLoadByIdRequested event,
-  Emitter<GroupState> emit,
-) async {
-  emit(GroupLoading());
+    GroupLoadByIdRequested event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(GroupLoading());
 
-  try {
-    final group = await _groupRepository.getGroupById(
-      event.groupId, 
-      event.year, 
-      event.month
-    );
-    emit(GroupDetailLoaded(group));
-  } catch (e) {
-    emit(GroupError(e.toString()));
+    try {
+      final group = await _groupRepository.getGroupById(
+        event.groupId, 
+        event.year, 
+        event.month
+      );
+      emit(GroupDetailLoaded(group));
+    } catch (e) {
+      emit(GroupError(e.toString()));
+    }
   }
-}
 
   Future<void> _onCreateRequested(
     GroupCreateRequested event,
@@ -85,6 +86,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         branchId: event.branchId,
         teacherId: event.teacherId,
         studentIds: event.studentIds,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        daysOfWeek: event.daysOfWeek,
       );
 
       _allGroups.add(newGroup);
@@ -109,6 +113,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         branchId: event.branchId,
         teacherId: event.teacherId,
         studentIds: event.studentIds,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        daysOfWeek: event.daysOfWeek,
       );
 
       final index = _allGroups.indexWhere((group) => group.id == event.id);
@@ -116,7 +123,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         _allGroups[index] = updatedGroup;
       }
 
-      emit(GroupOperationSuccess('Group updated successfully'));
+      emit(const GroupOperationSuccess('Group updated successfully'));
       emit(GroupLoaded(_allGroups, loadedBy: 'branch'));
     } catch (e) {
       emit(GroupError(e.toString()));
@@ -133,7 +140,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       await _groupRepository.deleteGroup(event.id);
       _allGroups.removeWhere((group) => group.id == event.id);
 
-      emit(GroupOperationSuccess('Group deleted successfully'));
+      emit(const GroupOperationSuccess('Group deleted successfully'));
       emit(GroupLoaded(_allGroups, loadedBy: 'branch'));
     } catch (e) {
       emit(GroupError(e.toString()));
@@ -158,6 +165,35 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
 
       _allGroups = groups;
       emit(GroupLoaded(groups, loadedBy: loadedBy));
+    } catch (e) {
+      emit(GroupError(e.toString()));
+    }
+  }
+
+  Future<void> _onRemoveStudentRequested(
+    GroupRemoveStudentRequested event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(GroupOperationLoading());
+
+    try {
+      await _groupRepository.removeStudentFromGroup(
+        event.groupId,
+        event.studentId,
+      );
+
+      emit(const GroupOperationSuccess('Student removed from group successfully'));
+      
+      // Refresh the group details to show updated student list
+      if (state is GroupDetailLoaded) {
+        final currentGroup = (state as GroupDetailLoaded).group;
+        final updatedGroup = await _groupRepository.getGroupById(
+          currentGroup.id,
+          DateTime.now().year,
+          DateTime.now().month,
+        );
+        emit(GroupDetailLoaded(updatedGroup));
+      }
     } catch (e) {
       emit(GroupError(e.toString()));
     }

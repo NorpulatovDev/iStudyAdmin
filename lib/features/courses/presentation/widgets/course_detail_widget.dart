@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:istudyadmin/features/groups/presentation/pages/group_details_page.dart';
+import 'package:istudyadmin/features/groups/presentation/widgets/create_group_dialog.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:istudyadmin/features/groups/presentation/bloc/group_bloc.dart';
 import '../../data/models/course_model.dart';
 
 class CourseDetailWidget extends StatelessWidget {
@@ -298,7 +301,7 @@ class CourseDetailWidget extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 12),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -311,6 +314,20 @@ class CourseDetailWidget extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                ElevatedButton.icon(
+                  onPressed: () => _showAddGroupDialog(context),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Group'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
                   ),
                 ),
@@ -384,20 +401,19 @@ class CourseDetailWidget extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  // subtitle: group.description != null
-                  //     ? Text(
-                  //         group.description!,
-                  //         maxLines: 2,
-                  //         overflow: TextOverflow.ellipsis,
-                  //       )
-                  //     : null,
+                  subtitle: Text(
+                    '${group.studentCount} students',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
                   trailing: Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
                     color: Colors.grey[400],
                   ),
                   onTap: () {
-                    // Handle group tap - navigate to group details
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -410,6 +426,19 @@ class CourseDetailWidget extends StatelessWidget {
               },
             ),
         ],
+      ),
+    );
+  }
+
+  void _showAddGroupDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<GroupBloc>(),
+        child: CreateGroupDialog(
+          courseId: course.id,
+          branchId: course.branchId,
+        ),
       ),
     );
   }

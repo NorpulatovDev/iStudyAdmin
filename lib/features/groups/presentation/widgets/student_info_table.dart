@@ -1,14 +1,18 @@
 // lib/features/groups/presentation/widgets/student_info_table.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/group_bloc.dart';
 import '../../data/models/group_model.dart';
 
 class StudentInfoTable extends StatelessWidget {
   final List<StudentInfo> students;
+  final int groupId;
 
   const StudentInfoTable({
     super.key,
     required this.students,
+    required this.groupId,
   });
 
   @override
@@ -95,7 +99,7 @@ class StudentInfoTable extends StatelessWidget {
             ],
             rows: List.generate(
               students.length,
-              (index) => _buildDataRow(students[index], index + 1),
+              (index) => _buildDataRow(context, students[index], index + 1),
             ),
           ),
         ),
@@ -103,7 +107,7 @@ class StudentInfoTable extends StatelessWidget {
     );
   }
 
-  DataRow _buildDataRow(StudentInfo student, int ordinal) {
+  DataRow _buildDataRow(BuildContext context, StudentInfo student, int ordinal) {
     Color? rowColor;
 
     switch (student.paymentStatus?.toLowerCase()) {
@@ -161,7 +165,7 @@ class StudentInfoTable extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.visibility, size: 18),
-                onPressed: () => _viewStudent(student),
+                onPressed: () => _viewStudent(context, student),
                 tooltip: 'View Student',
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.blue[50],
@@ -172,7 +176,7 @@ class StudentInfoTable extends StatelessWidget {
               const SizedBox(width: 4),
               IconButton(
                 icon: const Icon(Icons.edit, size: 18),
-                onPressed: () => _editStudent(student),
+                onPressed: () => _editStudent(context, student),
                 tooltip: 'Edit Student',
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.orange[50],
@@ -183,7 +187,7 @@ class StudentInfoTable extends StatelessWidget {
               const SizedBox(width: 4),
               IconButton(
                 icon: const Icon(Icons.remove_circle, size: 18),
-                onPressed: () => _removeStudent(student),
+                onPressed: () => _removeStudent(context, student),
                 tooltip: 'Remove from Group',
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.red[50],
@@ -232,15 +236,60 @@ class StudentInfoTable extends StatelessWidget {
     );
   }
 
-  void _viewStudent(StudentInfo student) {
-    debugPrint('View student: ${student.studentName}');
+  void _viewStudent(BuildContext context, StudentInfo student) {
+    // TODO: Implement view student functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('View student: ${student.studentName} - To be implemented')),
+    );
   }
 
-  void _editStudent(StudentInfo student) {
-    debugPrint('Edit student: ${student.studentName}');
+  void _editStudent(BuildContext context, StudentInfo student) {
+    // TODO: Implement edit student functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Edit student: ${student.studentName} - To be implemented')),
+    );
   }
 
-  void _removeStudent(StudentInfo student) {
-    debugPrint('Remove student: ${student.studentName}');
+  void _removeStudent(BuildContext context, StudentInfo student) {
+    if (student.studentId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot remove student: Student ID not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Remove Student'),
+        content: Text(
+          'Are you sure you want to remove "${student.studentName}" from this group?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              
+              // Dispatch remove student event
+              context.read<GroupBloc>().add(
+                GroupRemoveStudentRequested(
+                  groupId: groupId,
+                  studentId: student.studentId!,
+                ),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
   }
 }

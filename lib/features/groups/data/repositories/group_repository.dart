@@ -100,6 +100,9 @@ class GroupRepository {
     required int branchId,
     int? teacherId,
     List<int>? studentIds,
+    String? startTime,
+    String? endTime,
+    List<String>? daysOfWeek,
   }) async {
     try {
       final data = {
@@ -108,6 +111,9 @@ class GroupRepository {
         'branchId': branchId,
         if (teacherId != null) 'teacherId': teacherId,
         if (studentIds != null) 'studentIds': studentIds,
+        if (startTime != null) 'startTime': startTime,
+        if (endTime != null) 'endTime': endTime,
+        if (daysOfWeek != null) 'daysOfWeek': daysOfWeek,
       };
 
       final response = await _apiService.dio.post(
@@ -118,6 +124,12 @@ class GroupRepository {
       return GroupModel.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
+        final errorData = e.response?.data;
+        if (errorData != null && errorData['fieldErrors'] != null) {
+          final fieldErrors = errorData['fieldErrors'] as Map;
+          final errorMessage = fieldErrors.values.join(', ');
+          throw Exception('Validation error: $errorMessage');
+        }
         throw Exception('Invalid group data provided.');
       } else if (e.response?.statusCode == 403) {
         throw Exception('Access denied. Cannot create group in this branch.');
@@ -135,14 +147,17 @@ class GroupRepository {
     required int branchId,
     int? teacherId,
     List<int>? studentIds,
+    String? startTime,
+    String? endTime,
+    List<String>? daysOfWeek,
   }) async {
     try {
       final data = {
         'name': name,
-        'courseId': courseId,
-        'branchId': branchId,
         if (teacherId != null) 'teacherId': teacherId,
-        if (studentIds != null) 'studentIds': studentIds,
+        if (startTime != null) 'startTime': startTime,
+        if (endTime != null) 'endTime': endTime,
+        if (daysOfWeek != null) 'daysOfWeek': daysOfWeek,
       };
 
       final response = await _apiService.dio.put(
@@ -156,6 +171,14 @@ class GroupRepository {
         throw Exception('Group not found.');
       } else if (e.response?.statusCode == 403) {
         throw Exception('Access denied. Cannot update this group.');
+      } else if (e.response?.statusCode == 400) {
+        final errorData = e.response?.data;
+        if (errorData != null && errorData['fieldErrors'] != null) {
+          final fieldErrors = errorData['fieldErrors'] as Map;
+          final errorMessage = fieldErrors.values.join(', ');
+          throw Exception('Validation error: $errorMessage');
+        }
+        throw Exception('Invalid group data provided.');
       }
       throw Exception('Failed to update group: ${e.message}');
     } catch (e) {
@@ -175,6 +198,23 @@ class GroupRepository {
       throw Exception('Failed to delete group: ${e.message}');
     } catch (e) {
       throw Exception('Failed to delete group: $e');
+    }
+  }
+
+  Future<void> removeStudentFromGroup(int groupId, int studentId) async {
+    try {
+      await _apiService.dio.delete(
+        '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw Exception('Group or student not found.');
+      } else if (e.response?.statusCode == 403) {
+        throw Exception('Access denied. Cannot remove student from this group.');
+      }
+      throw Exception('Failed to remove student from group: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to remove student from group: $e');
     }
   }
 }
