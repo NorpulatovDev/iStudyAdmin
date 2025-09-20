@@ -11,6 +11,15 @@ final class GroupInitial extends GroupState {}
 
 final class GroupLoading extends GroupState {}
 
+final class GroupDetailLoaded extends GroupState {
+  final GroupModel group;
+
+  const GroupDetailLoaded(this.group);
+
+  @override
+  List<Object> get props => [group];
+}
+
 final class GroupLoaded extends GroupState {
   final List<GroupModel> groups;
   final String loadedBy; // 'branch' or 'course'

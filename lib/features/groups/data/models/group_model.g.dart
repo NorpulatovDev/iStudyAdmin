@@ -16,7 +16,7 @@ GroupModel _$GroupModelFromJson(Map<String, dynamic> json) => GroupModel(
       branchId: (json['branchId'] as num).toInt(),
       branchName: json['branchName'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      students: (json['students'] as List<dynamic>?)
+      studentPayments: (json['studentPayments'] as List<dynamic>?)
           ?.map((e) => StudentInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
@@ -32,7 +32,7 @@ Map<String, dynamic> _$GroupModelToJson(GroupModel instance) =>
       'branchId': instance.branchId,
       'branchName': instance.branchName,
       'createdAt': instance.createdAt.toIso8601String(),
-      'students': instance.students,
+      'studentPayments': instance.studentPayments,
     };
 
 StudentInfo _$StudentInfoFromJson(Map<String, dynamic> json) => StudentInfo(

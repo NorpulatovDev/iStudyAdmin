@@ -18,7 +18,7 @@ class GroupModel extends Equatable {
   final int branchId;
   final String branchName;
   final DateTime createdAt;
-  final List<StudentInfo>? students;
+  final List<StudentInfo>? studentPayments;
 
   const GroupModel({
     required this.id,
@@ -30,7 +30,7 @@ class GroupModel extends Equatable {
     required this.branchId,
     required this.branchName,
     required this.createdAt,
-    this.students,
+    this.studentPayments,
   });
 
   factory GroupModel.fromJson(Map<String, dynamic> json) =>
@@ -38,7 +38,7 @@ class GroupModel extends Equatable {
 
   Map<String, dynamic> toJson() => _$GroupModelToJson(this);
 
-  int get studentCount => students?.length ?? 0;
+  int get studentCount => studentPayments?.length ?? 0;
 
   @override
   List<Object?> get props => [
@@ -51,7 +51,7 @@ class GroupModel extends Equatable {
         branchId,
         branchName,
         createdAt,
-        students,
+        studentPayments,
       ];
 }
 

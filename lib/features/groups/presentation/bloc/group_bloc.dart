@@ -55,11 +55,22 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   // }
 
   Future<void> _onLoadById(
-    GroupLoadByIdRequested event,
-    Emitter emit,
-  ) async {
-    
+  GroupLoadByIdRequested event,
+  Emitter<GroupState> emit,
+) async {
+  emit(GroupLoading());
+
+  try {
+    final group = await _groupRepository.getGroupById(
+      event.groupId, 
+      event.year, 
+      event.month
+    );
+    emit(GroupDetailLoaded(group));
+  } catch (e) {
+    emit(GroupError(e.toString()));
   }
+}
 
   Future<void> _onCreateRequested(
     GroupCreateRequested event,

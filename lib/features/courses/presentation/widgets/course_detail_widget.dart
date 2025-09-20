@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:istudyadmin/features/groups/presentation/pages/group_details_page.dart';
 import '../../data/models/course_model.dart';
 
 class CourseDetailWidget extends StatelessWidget {
@@ -20,15 +21,15 @@ class CourseDetailWidget extends StatelessWidget {
           // Course Header
           _buildCourseHeader(context),
           const SizedBox(height: 24),
-          
+
           // Course Info Cards
           _buildInfoCards(context),
           const SizedBox(height: 24),
-          
+
           // Description Section
           _buildDescriptionSection(context),
           const SizedBox(height: 24),
-          
+
           // Groups Section
           _buildGroupsSection(context),
         ],
@@ -109,8 +110,8 @@ class CourseDetailWidget extends StatelessWidget {
           child: _buildInfoCard(
             context,
             'Duration',
-            course.durationMonths != null 
-                ? '${course.durationMonths} months' 
+            course.durationMonths != null
+                ? '${course.durationMonths} months'
                 : 'Not specified',
             Icons.schedule,
             Colors.blue,
@@ -130,7 +131,8 @@ class CourseDetailWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildInfoCard(BuildContext context, String title, String value,
+      IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -298,7 +300,8 @@ class CourseDetailWidget extends StatelessWidget {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,
                     borderRadius: BorderRadius.circular(12),
@@ -364,7 +367,8 @@ class CourseDetailWidget extends StatelessWidget {
                     vertical: 8,
                   ),
                   leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                    backgroundColor:
+                        Theme.of(context).primaryColor.withOpacity(0.1),
                     child: Text(
                       '${index + 1}',
                       style: TextStyle(
@@ -394,6 +398,13 @@ class CourseDetailWidget extends StatelessWidget {
                   ),
                   onTap: () {
                     // Handle group tap - navigate to group details
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            GroupDetailsPage(groupId: group.id),
+                      ),
+                    );
                   },
                 );
               },

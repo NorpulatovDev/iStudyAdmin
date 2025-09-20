@@ -8,7 +8,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../students/presentation/pages/students_page.dart';
 import '../../../teachers/presentation/pages/teachers_page.dart';
-import '../../../groups/presentation/pages/groups_page.dart';
+import '../../../groups/presentation/pages/group_details_page.dart';
 import '../../../payments/presentation/pages/payments_page.dart';
 import '../../../reports/presentation/pages/reports_page.dart';
 import '../widgets/app_drawer.dart';
@@ -29,7 +29,7 @@ class _MainLayoutState extends State<MainLayout> {
     const CoursesScreen(),
     const StudentsPage(),
     const TeachersPage(),
-    const GroupsPage(), // Groups from drawer - shows all branch groups
+    // const GroupDetailsPage(), // Groups from drawer - shows all branch groups
     const PaymentsPage(),
     const ReportsPage(),
   ];
