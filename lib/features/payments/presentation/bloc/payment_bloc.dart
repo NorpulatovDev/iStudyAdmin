@@ -19,6 +19,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     on<PaymentLoadRecentRequested>(_onLoadRecent);
     on<PaymentSearchRequested>(_onSearchRequested);
     on<PaymentCreateRequested>(_onCreateRequested);
+    on<PaymentDeleteRequested>(_onDeleteRequested);
     on<PaymentRefreshRequested>(_onRefreshRequested);
   }
 
@@ -140,6 +141,25 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
       _allPayments.insert(0, newPayment); // Add to beginning (most recent)
       emit(const PaymentOperationSuccess('Payment created successfully'));
+      emit(PaymentLoaded(_allPayments, loadedBy: 'branch'));
+    } catch (e) {
+      emit(PaymentError(e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteRequested(
+    PaymentDeleteRequested event,
+    Emitter<PaymentState> emit,
+  ) async {
+    emit(PaymentOperationLoading());
+
+    try {
+      await _paymentRepository.deletePayment(event.paymentId);
+
+      // Remove from local list
+      _allPayments.removeWhere((payment) => payment.id == event.paymentId);
+      
+      emit(const PaymentOperationSuccess('Payment deleted successfully'));
       emit(PaymentLoaded(_allPayments, loadedBy: 'branch'));
     } catch (e) {
       emit(PaymentError(e.toString()));

@@ -212,4 +212,27 @@ class PaymentRepository {
       throw Exception('Failed to create payment: $e');
     }
   }
+  
+  Future<void> deletePayment(int paymentId) async {
+    try {
+      final response = await _apiService.dio.delete(
+        '${ApiConstants.paymentsEndpoint}/$paymentId',
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete payment');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw Exception('Payment not found.');
+      } else if (e.response?.statusCode == 403) {
+        throw Exception('Access denied. Cannot delete this payment.');
+      } else if (e.response?.statusCode == 409) {
+        throw Exception('Cannot delete payment. It may be referenced by other records.');
+      }
+      throw Exception('Failed to delete payment: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to delete payment: $e');
+    }
+  }
 }

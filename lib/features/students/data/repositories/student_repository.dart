@@ -29,7 +29,7 @@ class StudentRepository {
     try {
       final user = await _getCurrentUser();
       final targetBranchId = branchId ?? user?.branchId;
-      
+
       if (targetBranchId == null) {
         throw Exception('Branch ID is required. Please login again.');
       }
@@ -57,7 +57,7 @@ class StudentRepository {
   Future<List<StudentModel>> getStudentsByGroup(int groupId) async {
     try {
       final response = await _apiService.dio.get(
-        ApiConstants.studentsEndpoint,
+        "${ApiConstants.studentsEndpoint}/by-group",
         queryParameters: {'groupId': groupId},
       );
 
@@ -84,7 +84,7 @@ class StudentRepository {
       final queryParams = <String, dynamic>{
         'branchId': branchId,
       };
-      
+
       if (firstName != null && firstName.trim().isNotEmpty) {
         queryParams['firstName'] = firstName.trim();
       }
@@ -142,7 +142,7 @@ class StudentRepository {
         'firstName': firstName,
         'lastName': lastName,
         'branchId': branchId,
-        if (phoneNumber != null && phoneNumber.isNotEmpty) 
+        if (phoneNumber != null && phoneNumber.isNotEmpty)
           'phoneNumber': phoneNumber,
       };
 
@@ -182,7 +182,7 @@ class StudentRepository {
         'firstName': firstName,
         'lastName': lastName,
         'branchId': branchId,
-        if (phoneNumber != null && phoneNumber.isNotEmpty) 
+        if (phoneNumber != null && phoneNumber.isNotEmpty)
           'phoneNumber': phoneNumber,
       };
 

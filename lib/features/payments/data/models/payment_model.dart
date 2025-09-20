@@ -11,8 +11,8 @@ class PaymentModel extends Equatable {
   final String studentName;
   final int courseId;
   final String courseName;
-  final int groupId;
-  final String groupName;
+  final int? groupId;
+  final String? groupName;
   final double amount;
   final String? description;
   final String status;

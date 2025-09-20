@@ -93,6 +93,17 @@ class PaymentCreateRequested extends PaymentEvent {
   List<Object?> get props => [request];
 }
 
+class PaymentDeleteRequested extends PaymentEvent {
+  final int paymentId;
+
+  const PaymentDeleteRequested({
+    required this.paymentId,
+  });
+
+  @override
+  List<Object> get props => [paymentId];
+}
+
 class PaymentRefreshRequested extends PaymentEvent {
   final int? branchId;
   final int? studentId;
