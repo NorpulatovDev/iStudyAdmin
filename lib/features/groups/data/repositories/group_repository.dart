@@ -240,4 +240,29 @@ class GroupRepository {
       throw Exception('Failed to remove student from group: $e');
     }
   }
+
+  Future<void> addStudentsToGroup(int groupId, int studentId) async {
+  try {
+    
+
+    await _apiService.dio.post(
+      '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
+    );
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 404) {
+      throw Exception('Group not found.');
+    } else if (e.response?.statusCode == 403) {
+      throw Exception('Access denied. Cannot add students to this group.');
+    } else if (e.response?.statusCode == 400) {
+      final errorData = e.response?.data;
+      if (errorData != null && errorData['message'] != null) {
+        throw Exception(errorData['message']);
+      }
+      throw Exception('Invalid request. Some students may already be in the group.');
+    }
+    throw Exception('Failed to add students to group: ${e.message}');
+  } catch (e) {
+    throw Exception('Failed to add students to group: $e');
+  }
+}
 }
