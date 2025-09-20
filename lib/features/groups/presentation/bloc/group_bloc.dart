@@ -15,8 +15,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   List<GroupModel> _allGroups = [];
 
   GroupBloc(this._groupRepository) : super(GroupInitial()) {
-    // on<GroupLoadByBranchRequested>(_onLoadByBranch);
-    // on<GroupLoadByCourseRequested>(_onLoadByCourse);
+    on<GroupLoadByBranchRequested>(_onLoadByBranch);
+    on<GroupLoadByCourseRequested>(_onLoadByCourse);
+    on<GroupLoadByTeacherRequested>(_onLoadByTeacher);
     on<GroupLoadByIdRequested>(_onLoadById);
     on<GroupCreateRequested>(_onCreateRequested);
     on<GroupUpdateRequested>(_onUpdateRequested);
@@ -25,35 +26,50 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     on<GroupRemoveStudentRequested>(_onRemoveStudentRequested);
   }
 
-  // Future<void> _onLoadByBranch(
-  //   GroupLoadByBranchRequested event,
-  //   Emitter<GroupState> emit,
-  // ) async {
-  //   emit(GroupLoading());
+  Future<void> _onLoadByBranch(
+    GroupLoadByBranchRequested event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(GroupLoading());
 
-  //   try {
-  //     final groups = await _groupRepository.getGroupsByBranch(event.branchId);
-  //     _allGroups = groups;
-  //     emit(GroupLoaded(groups, loadedBy: 'branch'));
-  //   } catch (e) {
-  //     emit(GroupError(e.toString()));
-  //   }
-  // }
+    try {
+      final groups = await _groupRepository.getGroupsByBranch(event.branchId);
+      _allGroups = groups;
+      emit(GroupLoaded(groups, loadedBy: 'branch'));
+    } catch (e) {
+      emit(GroupError(e.toString()));
+    }
+  }
 
-  // Future<void> _onLoadByCourse(
-  //   GroupLoadByCourseRequested event,
-  //   Emitter<GroupState> emit,
-  // ) async {
-  //   emit(GroupLoading());
+  Future<void> _onLoadByCourse(
+    GroupLoadByCourseRequested event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(GroupLoading());
 
-  //   try {
-  //     final groups = await _groupRepository.getGroupsByCourse(event.courseId);
-  //     _allGroups = groups;
-  //     emit(GroupLoaded(groups, loadedBy: 'course'));
-  //   } catch (e) {
-  //     emit(GroupError(e.toString()));
-  //   }
-  // }
+    try {
+      final groups = await _groupRepository.getGroupsByCourse(event.courseId);
+      _allGroups = groups;
+      emit(GroupLoaded(groups, loadedBy: 'course'));
+    } catch (e) {
+      emit(GroupError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadByTeacher(
+    GroupLoadByTeacherRequested event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(GroupLoading());
+
+    try {
+      final groups = await _groupRepository.getGroupsByTeacher(event.teacherId);
+      _allGroups = groups;
+      emit(GroupLoaded(groups, loadedBy: 'teacher'));
+    } catch (e) {
+      emit(GroupError(e.toString()));
+    }
+  }
 
   Future<void> _onLoadById(
     GroupLoadByIdRequested event,
@@ -158,6 +174,9 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       if (event.courseId != null) {
         groups = await _groupRepository.getGroupsByCourse(event.courseId!);
         loadedBy = 'course';
+      } else if (event.teacherId != null) {
+        groups = await _groupRepository.getGroupsByTeacher(event.teacherId!);
+        loadedBy = 'teacher';
       } else {
         groups = await _groupRepository.getGroupsByBranch(event.branchId);
         loadedBy = 'branch';

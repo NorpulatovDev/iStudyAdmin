@@ -25,6 +25,15 @@ class GroupLoadByCourseRequested extends GroupEvent {
   List<Object> get props => [courseId];
 }
 
+class GroupLoadByTeacherRequested extends GroupEvent {
+  final int teacherId;
+
+  const GroupLoadByTeacherRequested({required this.teacherId});
+
+  @override
+  List<Object> get props => [teacherId];
+}
+
 class GroupLoadByIdRequested extends GroupEvent{
   final int groupId;
   final int year;
@@ -100,11 +109,12 @@ class GroupDeleteRequested extends GroupEvent {
 class GroupRefreshRequested extends GroupEvent {
   final int? branchId;
   final int? courseId;
+  final int? teacherId;
 
-  const GroupRefreshRequested({this.branchId, this.courseId});
+  const GroupRefreshRequested({this.branchId, this.courseId, this.teacherId});
 
   @override
-  List<Object?> get props => [branchId, courseId];
+  List<Object?> get props => [branchId, courseId, teacherId];
 }
 
 class GroupRemoveStudentRequested extends GroupEvent {

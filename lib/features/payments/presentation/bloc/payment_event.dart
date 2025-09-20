@@ -83,22 +83,14 @@ class PaymentSearchRequested extends PaymentEvent {
 }
 
 class PaymentCreateRequested extends PaymentEvent {
-  final int studentId;
-  final int courseId;
-  final double amount;
-  final int branchId;
-  final String? description;
+  final CreatePaymentRequest request;
 
   const PaymentCreateRequested({
-    required this.studentId,
-    required this.courseId,
-    required this.amount,
-    required this.branchId,
-    this.description,
+    required this.request
   });
 
   @override
-  List<Object?> get props => [studentId, courseId, amount, branchId, description];
+  List<Object?> get props => [request];
 }
 
 class PaymentRefreshRequested extends PaymentEvent {

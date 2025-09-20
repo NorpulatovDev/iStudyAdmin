@@ -73,6 +73,28 @@ class GroupRepository {
     }
   }
 
+// Get groups by teacher ID
+  Future<List<GroupModel>> getGroupsByTeacher(int teacherId) async {
+    try {
+      final response = await _apiService.dio.get(
+        "${ApiConstants.groupsEndpoint}/by-teacher",
+        queryParameters: {'teacherId': teacherId},
+      );
+
+      final List<dynamic> groupsJson = response.data as List;
+      return groupsJson.map((json) => GroupModel.fromJson(json)).toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to this teacher\'s groups.');
+      } else if (e.response?.statusCode == 404) {
+        throw Exception('Teacher not found.');
+      }
+      throw Exception('Failed to fetch teacher groups: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch teacher groups: $e');
+    }
+  }
+
   Future<GroupModel> getGroupById(int id, int year, int month) async {
     try {
       final response = await _apiService.dio
@@ -210,7 +232,8 @@ class GroupRepository {
       if (e.response?.statusCode == 404) {
         throw Exception('Group or student not found.');
       } else if (e.response?.statusCode == 403) {
-        throw Exception('Access denied. Cannot remove student from this group.');
+        throw Exception(
+            'Access denied. Cannot remove student from this group.');
       }
       throw Exception('Failed to remove student from group: ${e.message}');
     } catch (e) {

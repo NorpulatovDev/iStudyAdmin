@@ -27,11 +27,11 @@ class AppDrawer extends StatelessWidget {
   });
 
   static const List<DrawerItem> _drawerItems = [
-    DrawerItem(
-      icon: Icons.dashboard_outlined,
-      title: 'Dashboard',
-      subtitle: 'Overview & stats',
-    ),
+    // DrawerItem(
+    //   icon: Icons.dashboard_outlined,
+    //   title: 'Dashboard',
+    //   subtitle: 'Overview & stats',
+    // ),
     DrawerItem(
       icon: Icons.school_outlined,
       title: 'Courses',
@@ -47,21 +47,21 @@ class AppDrawer extends StatelessWidget {
       title: 'Teachers',
       subtitle: 'Teacher management',
     ),
-    DrawerItem(
-      icon: Icons.group_outlined,
-      title: 'Groups',
-      subtitle: 'Class groups',
-    ),
+    // DrawerItem(
+    //   icon: Icons.group_outlined,
+    //   title: 'Groups',
+    //   subtitle: 'Class groups',
+    // ),
     DrawerItem(
       icon: Icons.payment_outlined,
       title: 'Payments',
       subtitle: 'Payment records',
     ),
-    DrawerItem(
-      icon: Icons.analytics_outlined,
-      title: 'Reports',
-      subtitle: 'Analytics & reports',
-    ),
+    // DrawerItem(
+    //   icon: Icons.analytics_outlined,
+    //   title: 'Reports',
+    //   subtitle: 'Analytics & reports',
+    // ),
   ];
 
   @override

@@ -29,7 +29,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     emit(PaymentLoading());
 
     try {
-      final payments = await _paymentRepository.getPaymentsByBranch(event.branchId);
+      final payments =
+          await _paymentRepository.getPaymentsByBranch(event.branchId);
       _allPayments = payments;
       emit(PaymentLoaded(payments, loadedBy: 'branch'));
     } catch (e) {
@@ -44,7 +45,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     emit(PaymentLoading());
 
     try {
-      final payments = await _paymentRepository.getPaymentsByStudent(event.studentId);
+      final payments =
+          await _paymentRepository.getPaymentsByStudent(event.studentId);
       _allPayments = payments;
       emit(PaymentLoaded(payments, loadedBy: 'student'));
     } catch (e) {
@@ -133,16 +135,11 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     emit(PaymentOperationLoading());
 
     try {
-      final newPayment = await _paymentRepository.createPayment(
-        studentId: event.studentId,
-        courseId: event.courseId,
-        amount: event.amount,
-        branchId: event.branchId,
-        description: event.description,
-      );
+      final newPayment =
+          await _paymentRepository.createPayment(request: event.request);
 
       _allPayments.insert(0, newPayment); // Add to beginning (most recent)
-      emit(PaymentOperationSuccess('Payment created successfully'));
+      emit(const PaymentOperationSuccess('Payment created successfully'));
       emit(PaymentLoaded(_allPayments, loadedBy: 'branch'));
     } catch (e) {
       emit(PaymentError(e.toString()));
@@ -156,9 +153,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     try {
       List<PaymentModel> payments;
       String loadedBy;
-      
+
       if (event.studentId != null) {
-        payments = await _paymentRepository.getPaymentsByStudent(event.studentId!);
+        payments =
+            await _paymentRepository.getPaymentsByStudent(event.studentId!);
         loadedBy = 'student';
       } else if (event.startDate != null && event.endDate != null) {
         payments = await _paymentRepository.getPaymentsByDateRange(
@@ -178,7 +176,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         payments = await _paymentRepository.getPaymentsByBranch(event.branchId);
         loadedBy = 'branch';
       }
-      
+
       _allPayments = payments;
       emit(PaymentLoaded(payments, loadedBy: loadedBy));
     } catch (e) {

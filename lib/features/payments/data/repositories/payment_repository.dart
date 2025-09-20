@@ -190,20 +190,10 @@ class PaymentRepository {
 
   // Create payment
   Future<PaymentModel> createPayment({
-    required int studentId,
-    required int courseId,
-    required double amount,
-    required int branchId,
-    String? description,
+    required CreatePaymentRequest request
   }) async {
     try {
-      final data = {
-        'studentId': studentId,
-        'courseId': courseId,
-        'amount': amount,
-        'branchId': branchId,
-        if (description != null) 'description': description,
-      };
+      final data = request.toJson();
 
       final response = await _apiService.dio.post(
         ApiConstants.paymentsEndpoint,

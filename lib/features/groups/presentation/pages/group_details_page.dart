@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../bloc/group_bloc.dart';
@@ -25,6 +26,9 @@ class GroupDetailsPage extends StatefulWidget {
 class _GroupDetailsPageState extends State<GroupDetailsPage> {
   late int currentYear;
   late int currentMonth;
+  final TextEditingController _yearController = TextEditingController();
+  final TextEditingController _monthController = TextEditingController();
+  final GlobalKey<FormState> _dateFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -32,13 +36,38 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
     final now = DateTime.now();
     currentYear = widget.initialYear ?? now.year;
     currentMonth = widget.initialMonth ?? now.month;
+    
+    _yearController.text = currentYear.toString();
+    _monthController.text = currentMonth.toString();
+    
     _loadGroupDetails();
+  }
+
+  @override
+  void dispose() {
+    _yearController.dispose();
+    _monthController.dispose();
+    super.dispose();
   }
 
   void _loadGroupDetails() {
     context.read<GroupBloc>().add(
           GroupLoadByIdRequested(widget.groupId, currentYear, currentMonth),
         );
+  }
+
+  void _updateDateAndLoad() {
+    if (_dateFormKey.currentState?.validate() ?? false) {
+      final newYear = int.parse(_yearController.text);
+      final newMonth = int.parse(_monthController.text);
+      
+      setState(() {
+        currentYear = newYear;
+        currentMonth = newMonth;
+      });
+      
+      _loadGroupDetails();
+    }
   }
 
   @override
@@ -148,88 +177,8 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
                 ),
               ),
             ),
-            _buildMonthYearSelector(),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildMonthYearSelector() {
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.calendar_month, color: Colors.white70, size: 16),
-          const SizedBox(width: 8),
-          DropdownButton<int>(
-            value: currentMonth,
-            dropdownColor: Colors.white,
-            style: const TextStyle(color: Colors.black, fontSize: 14),
-            underline: Container(),
-            icon: const Icon(Icons.arrow_drop_down,
-                color: Colors.white70, size: 16),
-            items: List.generate(12, (index) {
-              return DropdownMenuItem(
-                value: index + 1,
-                child: Text(months[index]),
-              );
-            }),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  currentMonth = value;
-                });
-                _loadGroupDetails();
-              }
-            },
-          ),
-          const SizedBox(width: 8),
-          DropdownButton<int>(
-            value: currentYear,
-            dropdownColor: Colors.white,
-            style: const TextStyle(color: Colors.black, fontSize: 14),
-            underline: Container(),
-            icon: const Icon(Icons.arrow_drop_down,
-                color: Colors.white70, size: 16),
-            items: List.generate(5, (index) {
-              final year = DateTime.now().year - 2 + index;
-              return DropdownMenuItem(
-                value: year,
-                child: Text(year.toString()),
-              );
-            }),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  currentYear = value;
-                });
-                _loadGroupDetails();
-              }
-            },
-          ),
-        ],
       ),
     );
   }
@@ -540,59 +489,192 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
                 ),
               ),
             ),
-            child: Row(
+            child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.people,
-                    color: Theme.of(context).primaryColor,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Students',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
+                // First row: Students header with icon and count
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.people,
+                        color: Theme.of(context).primaryColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Students',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${group.studentCount} students enrolled',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showAddStudentDialog(group),
+                      icon: const Icon(Icons.person_add, size: 18),
+                      label: const Text('Add Student'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${group.studentCount} students enrolled',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Second row: Date picker fields
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_month,
+                      color: Theme.of(context).primaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'View data for:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Form(
+                        key: _dateFormKey,
+                        child: Row(
+                          children: [
+                            // Year field
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                controller: _yearController,
+                                decoration: InputDecoration(
+                                  labelText: 'Year',
+                                  hintText: '2024',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  isDense: true,
+                                ),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(4),
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Required';
+                                  }
+                                  final year = int.tryParse(value);
+                                  if (year == null) {
+                                    return 'Invalid';
+                                  }
+                                  if (year < 2000 || year > 2100) {
+                                    return 'Invalid range';
+                                  }
+                                  return null;
+                                },
+                                onFieldSubmitted: (_) => _updateDateAndLoad(),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            
+                            // Month field
+                            Expanded(
+                              child: TextFormField(
+                                controller: _monthController,
+                                decoration: InputDecoration(
+                                  labelText: 'Month',
+                                  hintText: '12',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  isDense: true,
+                                ),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(2),
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Required';
+                                  }
+                                  final month = int.tryParse(value);
+                                  if (month == null) {
+                                    return 'Invalid';
+                                  }
+                                  if (month < 1 || month > 12) {
+                                    return '1-12 only';
+                                  }
+                                  return null;
+                                },
+                                onFieldSubmitted: (_) => _updateDateAndLoad(),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            
+                            // Apply button
+                            ElevatedButton(
+                              onPressed: _updateDateAndLoad,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                                foregroundColor: Theme.of(context).primaryColor,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text('Apply'),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _showAddStudentDialog(group),
-                  icon: const Icon(Icons.person_add, size: 18),
-                  label: const Text('Add Student'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),

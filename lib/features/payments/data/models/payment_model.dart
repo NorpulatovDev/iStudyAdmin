@@ -11,6 +11,8 @@ class PaymentModel extends Equatable {
   final String studentName;
   final int courseId;
   final String courseName;
+  final int groupId;
+  final String groupName;
   final double amount;
   final String? description;
   final String status;
@@ -24,6 +26,8 @@ class PaymentModel extends Equatable {
     required this.studentName,
     required this.courseId,
     required this.courseName,
+    required this.groupId,
+    required this.groupName,
     required this.amount,
     this.description,
     required this.status,
@@ -44,11 +48,47 @@ class PaymentModel extends Equatable {
         studentName,
         courseId,
         courseName,
+        groupId,
+        groupName,
         amount,
         description,
         status,
         branchId,
         branchName,
         createdAt,
+      ];
+}
+
+@JsonSerializable()
+class CreatePaymentRequest extends Equatable {
+  final int studentId;
+  final int groupId;
+  final double amount;
+  final String? description;
+  final int branchId;
+  final int paymentYear;
+  final int paymentMonth;
+
+  const CreatePaymentRequest({
+    required this.studentId,
+    required this.groupId,
+    required this.amount,
+    this.description,
+    required this.branchId,
+    required this.paymentYear,
+    required this.paymentMonth,
+  });
+
+  Map<String, dynamic> toJson() => _$CreatePaymentRequestToJson(this);
+
+  @override
+  List<Object?> get props => [
+        studentId,
+        groupId,
+        amount,
+        description,
+        branchId,
+        paymentYear,
+        paymentMonth,
       ];
 }
