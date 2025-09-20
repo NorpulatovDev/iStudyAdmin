@@ -7,8 +7,8 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 // import '../../../courses/presentation/pages/course_page.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../students/presentation/pages/students_page.dart';
-import '../../../teachers/presentation/pages/teachers_page.dart';
-import '../../../groups/presentation/pages/group_details_page.dart';
+// import '../../../teachers/presentation/pages/teachers_page.dart';
+// import '../../../groups/presentation/pages/group_details_page.dart';
 import '../../../payments/presentation/pages/payments_page.dart';
 import '../../../reports/presentation/pages/reports_page.dart';
 import '../widgets/app_drawer.dart';
@@ -26,9 +26,9 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> _pages = [
     const DashboardPage(),
-    const CoursesScreen(),
+    const CoursesPage(),
     const StudentsPage(),
-    const TeachersPage(),
+    // const TeachersPage(),
     // const GroupDetailsPage(), // Groups from drawer - shows all branch groups
     const PaymentsPage(),
     const ReportsPage(),

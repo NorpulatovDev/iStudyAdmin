@@ -14,7 +14,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
   CourseBloc(this._courseRepository) : super(CourseInitial()) {
     on<CourseLoadRequested>(_onLoadRequested);
-    // on<CourseSearchRequested>(_onSearchRequested);
+    on<CourseLoadByIdRequested>(_onLoadByIdRequested);
     on<CourseCreateRequested>(_onCreateRequested);
     on<CourseUpdateRequested>(_onUpdateRequested);
     on<CourseDeleteRequested>(_onDeleteRequested);
@@ -39,28 +39,19 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     }
   }
 
-  // Future<void> _onSearchRequested(
-  //   CourseSearchRequested event,
-  //   Emitter<CourseState> emit,
-  // ) async {
-  //   if (event.query.trim().isEmpty) {
-  //     // If search is empty, show all courses
-  //     emit(CourseLoaded(_allCourses));
-  //     return;
-  //   }
+  Future<void> _onLoadByIdRequested(
+    CourseLoadByIdRequested event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(CourseLoading());
 
-  //   emit(CourseLoading());
-
-  //   try {
-  //     final courses = await _courseRepository.searchCourses(
-  //       branchId: event.branchId,
-  //       name: event.query,
-  //     );
-  //     emit(CourseLoaded(courses, isSearchResult: true));
-  //   } catch (e) {
-  //     emit(CourseError(e.toString()));
-  //   }
-  // }
+    try {
+      final course = await _courseRepository.getCourseById(event.courseId);
+      emit(CourseDetailLoaded(course));
+    } catch (e) {
+      emit(CourseError(e.toString()));
+    }
+  }
 
   Future<void> _onCreateRequested(
     CourseCreateRequested event,
@@ -111,10 +102,15 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
         _allCourses[index] = updatedCourse;
       }
 
-      emit(CourseOperationSuccess('Course updated successfully'));
+      emit(const CourseOperationSuccess('Course updated successfully'));
       
-      // Refresh the list
-      add(CourseRefreshRequested(branchId: event.branchId));
+      // If we're on course details page, emit the updated course
+      if (state is CourseDetailLoaded) {
+        emit(CourseDetailLoaded(updatedCourse));
+      } else {
+        // Otherwise refresh the list
+        add(CourseRefreshRequested(branchId: event.branchId));
+      }
     } catch (e) {
       emit(CourseError(e.toString()));
     }
@@ -132,7 +128,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       // Remove from local cache
       _allCourses.removeWhere((course) => course.id == event.id);
 
-      emit( const CourseOperationSuccess('Course deleted successfully'));
+      emit(const CourseOperationSuccess('Course deleted successfully'));
       
       // Refresh the list
       add(CourseRefreshRequested(branchId: _currentBranchId));

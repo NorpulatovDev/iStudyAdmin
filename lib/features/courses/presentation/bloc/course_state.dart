@@ -22,6 +22,15 @@ final class CourseLoaded extends CourseState {
   List<Object> get props => [courses, isSearchResult];
 }
 
+final class CourseDetailLoaded extends CourseState {
+  final CourseModel course;
+
+  const CourseDetailLoaded(this.course);
+
+  @override
+  List<Object> get props => [course];
+}
+
 final class CourseError extends CourseState {
   final String message;
 

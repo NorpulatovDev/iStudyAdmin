@@ -53,54 +53,24 @@ class CourseRepository {
     }
   }
 
-  // Future<List<CourseModel>> searchCourses({
-  //   required int branchId,
-  //   String? name,
-  // }) async {
-  //   try {
-  //     final queryParams = <String, dynamic>{
-  //       'branchId': branchId,
-  //     };
-      
-  //     if (name != null && name.trim().isNotEmpty) {
-  //       queryParams['name'] = name.trim();
-  //     }
+  Future<CourseModel> getCourseById(int id) async {
+    try {
+      final response = await _apiService.dio.get(
+        '${ApiConstants.coursesEndpoint}/$id',
+      );
 
-  //     final response = await _apiService.dio.get(
-  //       '${ApiConstants.coursesEndpoint}/search',
-  //       queryParameters: queryParams,
-  //     );
-
-  //     final List<dynamic> coursesJson = response.data as List;
-  //     return coursesJson.map((json) => CourseModel.fromJson(json)).toList();
-  //   } on DioException catch (e) {
-  //     if (e.response?.statusCode == 403) {
-  //       throw Exception('Access denied to this branch.');
-  //     }
-  //     throw Exception('Failed to search courses: ${e.message}');
-  //   } catch (e) {
-  //     throw Exception('Failed to search courses: $e');
-  //   }
-  // }
-
-  // Future<CourseModel> getCourseById(int id) async {
-  //   try {
-  //     final response = await _apiService.dio.get(
-  //       '${ApiConstants.coursesEndpoint}/$id',
-  //     );
-
-  //     return CourseModel.fromJson(response.data);
-  //   } on DioException catch (e) {
-  //     if (e.response?.statusCode == 404) {
-  //       throw Exception('Course not found.');
-  //     } else if (e.response?.statusCode == 403) {
-  //       throw Exception('Access denied to this course.');
-  //     }
-  //     throw Exception('Failed to fetch course: ${e.message}');
-  //   } catch (e) {
-  //     throw Exception('Failed to fetch course: $e');
-  //   }
-  // }
+      return CourseModel.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw Exception('Course not found.');
+      } else if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to this course.');
+      }
+      throw Exception('Failed to fetch course: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch course: $e');
+    }
+  }
 
   Future<CourseModel> createCourse({
     required String name,

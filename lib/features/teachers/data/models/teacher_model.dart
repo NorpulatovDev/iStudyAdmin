@@ -10,7 +10,6 @@ class TeacherModel extends Equatable {
   final String firstName;
   final String lastName;
   final String? phoneNumber;
-  final String? email;
   final double baseSalary;
   final double paymentPercentage;
   final String salaryType; // "FIXED", "PERCENTAGE", "MIXED"
@@ -23,7 +22,6 @@ class TeacherModel extends Equatable {
     required this.firstName,
     required this.lastName,
     this.phoneNumber,
-    this.email,
     required this.baseSalary,
     required this.paymentPercentage,
     required this.salaryType,
@@ -58,7 +56,6 @@ class TeacherModel extends Equatable {
         firstName,
         lastName,
         phoneNumber,
-        email,
         baseSalary,
         paymentPercentage,
         salaryType,
