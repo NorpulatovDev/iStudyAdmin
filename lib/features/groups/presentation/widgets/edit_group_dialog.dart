@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:istudyadmin/features/teachers/presentation/bloc/teacher_bloc.dart';
 import '../bloc/group_bloc.dart';
 import '../../data/models/group_model.dart';
 
@@ -20,14 +21,20 @@ class EditGroupDialog extends StatefulWidget {
 class _EditGroupDialogState extends State<EditGroupDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  
+
   int? _selectedTeacherId;
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
   List<String> _selectedDays = [];
-  
+
   final List<String> _daysOfWeek = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'MONDAY',
+    'TUESDAY',
+    'WEDNESDAY',
+    'THURSDAY',
+    'FRIDAY',
+    'SATURDAY',
+    'SUNDAY'
   ];
 
   @override
@@ -40,7 +47,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     _nameController.text = widget.group.name;
     _selectedTeacherId = widget.group.teacherId;
     _selectedDays = List.from(widget.group.daysOfWeek);
-    
+
     // Parse existing times if available
     _startTime = _parseTimeString(widget.group.startTime);
     _endTime = _parseTimeString(widget.group.endTime);
@@ -48,7 +55,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
 
   TimeOfDay? _parseTimeString(String timeString) {
     if (timeString.isEmpty) return null;
-    
+
     try {
       final parts = timeString.split(':');
       if (parts.length >= 2) {
@@ -167,36 +174,49 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
               },
             ),
             const SizedBox(height: 16),
-            
+
             // Teacher Selection (Simple dropdown without dynamic loading)
-            DropdownButtonFormField<int>(
-              value: _selectedTeacherId,
-              decoration: const InputDecoration(
-                labelText: 'Teacher',
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-                helperText: 'Leave empty for no teacher assignment',
-              ),
-              items: [
-                const DropdownMenuItem<int>(
-                  value: null,
-                  child: Text('No teacher assigned'),
-                ),
-                // TODO: Add actual teachers here - for now just keeping current
-                if (widget.group.teacherId != null)
-                  DropdownMenuItem<int>(
-                    value: widget.group.teacherId,
-                    child: Text(widget.group.teacherName ?? 'Current Teacher'),
-                  ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedTeacherId = value;
-                });
+            BlocBuilder<TeacherBloc, TeacherState>(
+              builder: (context, state) {
+                if (state is TeacherLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is TeacherLoaded) {
+                  final teachers = state.teachers;
+
+                  return DropdownButtonFormField<int?>(
+                    value: _selectedTeacherId,
+                    decoration: const InputDecoration(
+                      labelText: 'Teacher',
+                      prefixIcon: Icon(Icons.person),
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      const DropdownMenuItem<int?>(
+                        value: null,
+                        child: Text('No teacher assigned'),
+                      ),
+                      ...teachers.map((teacher) {
+                        return DropdownMenuItem<int?>(
+                          value: teacher.id,
+                          child:
+                              Text("${teacher.firstName} ${teacher.lastName}"),
+                        );
+                      }).toList(),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedTeacherId = value;
+                      });
+                    },
+                  );
+                } else if (state is TeacherError) {
+                  return Text("Error: ${state.message}");
+                }
+
+                return const SizedBox.shrink();
               },
             ),
             const SizedBox(height: 16),
-            
             // Time Selection
             Row(
               children: [
@@ -210,7 +230,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Days of Week Selection
             const Text(
               'Days of Week',
@@ -223,7 +243,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
               children: _daysOfWeek.map((day) => _buildDayChip(day)).toList(),
             ),
             const SizedBox(height: 16),
-            
+
             // Current Group Info
             Container(
               width: double.infinity,
@@ -344,7 +364,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
         },
         builder: (context, state) {
           final isLoading = state is GroupOperationLoading;
-          
+
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -378,17 +398,18 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     final endTime = _formatTimeOfDay(_endTime);
 
     context.read<GroupBloc>().add(
-      GroupUpdateRequested(
-        id: widget.group.id,
-        name: name,
-        courseId: widget.group.courseId,
-        branchId: widget.group.branchId,
-        teacherId: _selectedTeacherId,
-        startTime: startTime.isNotEmpty ? startTime : null,
-        endTime: endTime.isNotEmpty ? endTime : null,
-        daysOfWeek: _selectedDays.isNotEmpty ? _selectedDays : null,
-      ),
-    );
+          GroupUpdateRequested(
+            id: widget.group.id,
+            name: name,
+            courseId: widget.group.courseId,
+            branchId: widget.group.branchId,
+            teacherId: _selectedTeacherId,
+            startTime: startTime.isNotEmpty ? startTime : null,
+            endTime: endTime.isNotEmpty ? endTime : null,
+            daysOfWeek: _selectedDays.isNotEmpty ? _selectedDays : null,
+            
+          ),
+        );
   }
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
@@ -397,7 +418,7 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
       context: context,
       initialTime: initialTime ?? TimeOfDay.now(),
     );
-    
+
     if (picked != null) {
       setState(() {
         if (isStartTime) {

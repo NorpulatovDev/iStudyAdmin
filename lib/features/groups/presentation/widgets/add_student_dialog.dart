@@ -1,4 +1,4 @@
- // lib/features/groups/presentation/widgets/add_student_dialog.dart
+// lib/features/groups/presentation/widgets/add_student_dialog.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,8 +47,8 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
     try {
       // Load students from the same branch who are not already in this group
       context.read<StudentBloc>().add(
-        StudentLoadByBranchRequested(branchId: widget.group.branchId),
-      );
+            StudentLoadByBranchRequested(branchId: widget.group.branchId),
+          );
     } catch (e) {
       print('Error loading students: $e');
     } finally {
@@ -64,10 +64,11 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
         _filteredStudents = _availableStudents;
       } else {
         _filteredStudents = _availableStudents.where((student) {
-          final fullName = '${student.firstName} ${student.lastName}'.toLowerCase();
+          final fullName =
+              '${student.firstName} ${student.lastName}'.toLowerCase();
           final phoneNumber = student.phoneNumber?.toLowerCase() ?? '';
           final query = _searchQuery.toLowerCase();
-          
+
           return fullName.contains(query) || phoneNumber.contains(query);
         }).toList();
       }
@@ -76,19 +77,22 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
 
   List<StudentModel> _getStudentsNotInGroup(List<StudentModel> allStudents) {
     final groupStudentIds = widget.group.studentPayments
-        ?.map((s) => s.studentId)
-        .where((id) => id != null)
-        .cast<int>()
-        .toSet() ?? <int>{};
+            ?.map((s) => s.studentId)
+            .where((id) => id != null)
+            .cast<int>()
+            .toSet() ??
+        <int>{};
 
-    return allStudents.where((student) => !groupStudentIds.contains(student.id)).toList();
+    return allStudents
+        .where((student) => !groupStudentIds.contains(student.id))
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
-    
+
     return Dialog(
       insetPadding: EdgeInsets.all(isDesktop ? 40 : 16),
       child: Container(
@@ -100,7 +104,7 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
         child: Column(
           children: [
             _buildHeader(),
-            _buildSearchField(),
+            // _buildSearchField(),
             Expanded(child: _buildStudentsList()),
             _buildActionButtons(),
           ],
@@ -155,54 +159,54 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
     );
   }
 
-  Widget _buildSearchField() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: 'Search students by name or phone...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _searchQuery = '';
-                    });
-                    _filterStudents();
-                  },
-                )
-              : IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _loadAvailableStudents,
-                ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        ),
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-          });
-          _filterStudents();
-        },
-      ),
-    );
-  }
+  // Widget _buildSearchField() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(0.05),
+  //           blurRadius: 4,
+  //           offset: const Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: TextField(
+  //       controller: _searchController,
+  //       decoration: InputDecoration(
+  //         hintText: 'Search students by name or phone...',
+  //         prefixIcon: const Icon(Icons.search),
+  //         suffixIcon: _searchController.text.isNotEmpty
+  //             ? IconButton(
+  //                 icon: const Icon(Icons.clear),
+  //                 onPressed: () {
+  //                   _searchController.clear();
+  //                   setState(() {
+  //                     _searchQuery = '';
+  //                   });
+  //                   _filterStudents();
+  //                 },
+  //               )
+  //             : IconButton(
+  //                 icon: const Icon(Icons.refresh),
+  //                 onPressed: _loadAvailableStudents,
+  //               ),
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(12),
+  //           borderSide: BorderSide(color: Colors.grey[300]!),
+  //         ),
+  //         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+  //       ),
+  //       onChanged: (value) {
+  //         setState(() {
+  //           _searchQuery = value;
+  //         });
+  //         _filterStudents();
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildStudentsList() {
     return BlocBuilder<StudentBloc, StudentState>(
@@ -256,13 +260,14 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
 
   Widget _buildStudentCard(StudentModel student) {
     final isSelected = _selectedStudent?.id == student.id;
-    
+
     return Card(
       elevation: isSelected ? 4 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+          color:
+              isSelected ? Theme.of(context).primaryColor : Colors.transparent,
           width: 2,
         ),
       ),
@@ -277,20 +282,20 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: isSelected 
+            color: isSelected
                 ? Theme.of(context).primaryColor.withOpacity(0.05)
                 : null,
           ),
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: isSelected 
-                    ? Theme.of(context).primaryColor 
+                backgroundColor: isSelected
+                    ? Theme.of(context).primaryColor
                     : Theme.of(context).primaryColor.withOpacity(0.1),
                 child: Icon(
                   Icons.person,
-                  color: isSelected 
-                      ? Colors.white 
+                  color: isSelected
+                      ? Colors.white
                       : Theme.of(context).primaryColor,
                 ),
               ),
@@ -304,8 +309,8 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: isSelected 
-                            ? Theme.of(context).primaryColor 
+                        color: isSelected
+                            ? Theme.of(context).primaryColor
                             : Colors.black87,
                       ),
                     ),
@@ -525,7 +530,7 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
         builder: (context, state) {
           final isLoading = state is GroupOperationLoading;
           final hasSelection = _selectedStudent != null;
-          
+
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -535,7 +540,9 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
               ),
               const SizedBox(width: 12),
               ElevatedButton(
-                onPressed: isLoading ? null : (hasSelection ? _addStudentToGroup : null),
+                onPressed: isLoading
+                    ? null
+                    : (hasSelection ? _addStudentToGroup : null),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: hasSelection ? null : Colors.grey[300],
                   foregroundColor: hasSelection ? null : Colors.grey[600],
@@ -599,7 +606,8 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.blue[600], size: 16),
+                      Icon(Icons.info_outline,
+                          color: Colors.blue[600], size: 16),
                       const SizedBox(width: 8),
                       const Text(
                         'Student Information',
@@ -636,11 +644,11 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
             onPressed: () {
               Navigator.of(dialogContext).pop();
               context.read<GroupBloc>().add(
-                GroupAddStudentRequested(
-                  groupId: widget.group.id,
-                  studentId: _selectedStudent!.id,
-                ),
-              );
+                    GroupAddStudentRequested(
+                      groupId: widget.group.id,
+                      studentId: _selectedStudent!.id,
+                    ),
+                  );
             },
             child: const Text('Add Student'),
           ),

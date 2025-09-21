@@ -22,8 +22,8 @@ StudentModel _$StudentModelFromJson(Map<String, dynamic> json) => StudentModel(
       lastPaymentDate: json['lastPaymentDate'] == null
           ? null
           : DateTime.parse(json['lastPaymentDate'] as String),
-      groupIds: (json['groups'] as List<dynamic>?)
-          ?.map((e) => (e['id'] as num).toInt())
+      groupIds: (json['groupIds'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
           .toList(),
     );
 

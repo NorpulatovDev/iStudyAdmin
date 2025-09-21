@@ -769,10 +769,7 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
   void _showUpdateGroupDialog(GroupModel group) {
     showDialog(
       context: context,
-      builder: (dialogContext) => BlocProvider.value(
-        value: context.read<GroupBloc>(),
-        child: EditGroupDialog(group: group),
-      ),
+      builder: (dialogContext) => EditGroupDialog(group: group),
     );
   }
 
@@ -854,6 +851,8 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
   }
 
   void _showAddStudentDialog(GroupModel group) {
+    // Simple implementation - show a snackbar for now
+    // This can be enhanced later when student management is fully implemented
     showDialog(
       context: context,
       builder: (dialogContext) => AddStudentDialog(group: group),

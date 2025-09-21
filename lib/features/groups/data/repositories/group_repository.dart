@@ -179,6 +179,9 @@ class GroupRepository {
       // Build the data object with only the fields that should be updated
       final data = <String, dynamic>{
         'name': name,
+        'courseId':courseId,
+        'branchId':branchId,
+        'studentIds':studentIds,
       };
 
       // Only include optional fields if they are provided
