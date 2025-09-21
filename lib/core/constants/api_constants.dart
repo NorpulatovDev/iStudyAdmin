@@ -27,6 +27,8 @@ class ApiConstants {
 
   // Teacher endpoints
   static const String teachersEndpoint = '/teachers';
+
+  // Teacher Salary endpoints
   static const String teacherSalariesEndpoint = '/teacher-salaries';
   static const String salaryCalculateEndpoint = '/teacher-salaries/calculate';
   static const String salaryPaymentsEndpoint = '/teacher-salaries/payments';
@@ -35,6 +37,9 @@ class ApiConstants {
 
   // Payment endpoints
   static const String paymentsEndpoint = '/payments';
+
+  // Expense endpoints
+  static const String expensesEndpoint = '/api/expenses';
 
   // Report endpoints
   static const String reportsEndpoint = '/reports';

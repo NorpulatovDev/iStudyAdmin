@@ -1,5 +1,7 @@
 // lib/core/injection/injection_container.dart
 import 'package:get_it/get_it.dart';
+import 'package:istudyadmin/features/salary/data/repositories/teacher_salary_repository.dart';
+import 'package:istudyadmin/features/salary/presentation/bloc/teacher_salary_bloc.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
@@ -51,6 +53,10 @@ Future<void> setupLocator() async {
 
   sl.registerLazySingleton<ReportRepository>(
     () => ReportRepository(sl<ApiService>(), sl<StorageService>()),
+  );
+
+  sl.registerLazySingleton<TeacherSalaryRepository>(
+    () => TeacherSalaryRepository(sl<ApiService>(), sl<StorageService>()),
   ); 
 
   // BLoCs
@@ -61,4 +67,5 @@ Future<void> setupLocator() async {
   sl.registerLazySingleton<TeacherBloc>(() => TeacherBloc(sl<TeacherRepository>()));
   sl.registerLazySingleton<PaymentBloc>(() => PaymentBloc(sl<PaymentRepository>()));
   sl.registerLazySingleton<ReportBloc>(() => ReportBloc(sl<ReportRepository>()));
+  sl.registerLazySingleton<TeacherSalaryBloc>(() => TeacherSalaryBloc(sl<TeacherSalaryRepository>()));
 }

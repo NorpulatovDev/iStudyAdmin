@@ -57,11 +57,11 @@ class AppDrawer extends StatelessWidget {
       title: 'Payments',
       subtitle: 'Payment records',
     ),
-    // DrawerItem(
-    //   icon: Icons.analytics_outlined,
-    //   title: 'Reports',
-    //   subtitle: 'Analytics & reports',
-    // ),
+    DrawerItem(
+      icon: Icons.analytics_outlined,
+      title: 'Salary',
+      subtitle: 'Analytics & reports',
+    ),
   ];
 
   @override
@@ -192,9 +192,8 @@ class AppDrawer extends StatelessWidget {
                       title: Text(
                         item.title,
                         style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
                           color: isSelected
                               ? AppTheme.primaryColor
                               : const Color(0xFF1F2937),

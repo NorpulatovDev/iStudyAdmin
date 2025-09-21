@@ -154,7 +154,7 @@ class TeacherSalaryHistoryModel extends Equatable {
   final double totalSalary;
   final double totalPaid;
   final double remainingAmount;
-  final bool isFullyPaid;
+  final bool fullyPaid;
   final DateTime? lastPaymentDate;
   final int paymentCount;
 
@@ -166,7 +166,7 @@ class TeacherSalaryHistoryModel extends Equatable {
     required this.totalSalary,
     required this.totalPaid,
     required this.remainingAmount,
-    required this.isFullyPaid,
+    required this.fullyPaid,
     this.lastPaymentDate,
     required this.paymentCount,
   });
@@ -185,7 +185,7 @@ class TeacherSalaryHistoryModel extends Equatable {
         totalSalary,
         totalPaid,
         remainingAmount,
-        isFullyPaid,
+        fullyPaid,
         lastPaymentDate,
         paymentCount,
       ];

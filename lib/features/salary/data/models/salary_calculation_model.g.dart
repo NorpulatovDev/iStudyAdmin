@@ -108,7 +108,7 @@ TeacherSalaryHistoryModel _$TeacherSalaryHistoryModelFromJson(
       totalSalary: (json['totalSalary'] as num).toDouble(),
       totalPaid: (json['totalPaid'] as num).toDouble(),
       remainingAmount: (json['remainingAmount'] as num).toDouble(),
-      isFullyPaid: json['isFullyPaid'] as bool,
+      fullyPaid: json['fullyPaid'] as bool,
       lastPaymentDate: json['lastPaymentDate'] == null
           ? null
           : DateTime.parse(json['lastPaymentDate'] as String),
@@ -125,7 +125,7 @@ Map<String, dynamic> _$TeacherSalaryHistoryModelToJson(
       'totalSalary': instance.totalSalary,
       'totalPaid': instance.totalPaid,
       'remainingAmount': instance.remainingAmount,
-      'isFullyPaid': instance.isFullyPaid,
+      'isFullyPaid': instance.fullyPaid,
       'lastPaymentDate': instance.lastPaymentDate?.toIso8601String(),
       'paymentCount': instance.paymentCount,
     };

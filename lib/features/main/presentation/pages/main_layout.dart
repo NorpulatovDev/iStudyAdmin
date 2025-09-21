@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:istudyadmin/features/courses/presentation/pages/courses_page.dart';
+import 'package:istudyadmin/features/salary/presentation/pages/salary_management_page.dart';
 import 'package:istudyadmin/features/teachers/presentation/pages/teachers_page.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -32,7 +33,7 @@ class _MainLayoutState extends State<MainLayout> {
     const TeachersPage(),
     // const GroupDetailsPage(), // Groups from drawer - shows all branch groups
     const PaymentsPage(),
-    const ReportsPage(),
+    const SalaryPage(),
   ];
 
   final List<String> _pageTitles = [

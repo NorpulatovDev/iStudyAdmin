@@ -1,6 +1,8 @@
 // lib/app.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:istudyadmin/features/salary/data/repositories/teacher_salary_repository.dart';
+import 'package:istudyadmin/features/salary/presentation/bloc/teacher_salary_bloc.dart';
 import './core/injection/injection_container.dart';
 import './features/auth/data/repositories/auth_repository.dart';
 import './features/courses/data/repositories/course_repository.dart';
@@ -48,6 +50,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => ReportBloc(sl<ReportRepository>()),
+        ),
+        BlocProvider(
+          create: (context) => TeacherSalaryBloc(sl<TeacherSalaryRepository>()),
         ),
       ],
       child: MaterialApp(

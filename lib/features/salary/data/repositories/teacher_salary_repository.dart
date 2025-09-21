@@ -32,7 +32,7 @@ class TeacherSalaryRepository {
   }) async {
     try {
       final response = await _apiService.dio.get(
-        '/api/teacher-salaries/calculate/teacher/$teacherId',
+        '/teacher-salaries/calculate/teacher/$teacherId',
         queryParameters: {
           'year': year,
           'month': month,
@@ -67,7 +67,7 @@ class TeacherSalaryRepository {
       }
 
       final response = await _apiService.dio.get(
-        '/api/teacher-salaries/calculate/branch/$targetBranchId',
+        '/teacher-salaries/calculate/branch/$targetBranchId',
         queryParameters: {
           'year': year,
           'month': month,
@@ -115,7 +115,7 @@ class TeacherSalaryRepository {
       };
 
       final response = await _apiService.dio.post(
-        '/api/teacher-salaries/payments',
+        '/teacher-salaries/payments',
         data: data,
       );
 
@@ -149,7 +149,7 @@ class TeacherSalaryRepository {
       }
 
       final response = await _apiService.dio.get(
-        '/api/teacher-salaries/payments/branch/$targetBranchId',
+        '/teacher-salaries/payments/branch/$targetBranchId',
       );
 
       final List<dynamic> paymentsJson = response.data as List;
@@ -172,7 +172,7 @@ class TeacherSalaryRepository {
   ) async {
     try {
       final response = await _apiService.dio.get(
-        '/api/teacher-salaries/payments/teacher/$teacherId',
+        '/teacher-salaries/payments/teacher/$teacherId',
       );
 
       final List<dynamic> paymentsJson = response.data as List;
@@ -197,7 +197,7 @@ class TeacherSalaryRepository {
   }) async {
     try {
       final response = await _apiService.dio.get(
-        '/api/teacher-salaries/payments/teacher/$teacherId/month',
+        '/teacher-salaries/payments/teacher/$teacherId/month',
         queryParameters: {
           'year': year,
           'month': month,
@@ -224,7 +224,7 @@ class TeacherSalaryRepository {
   ) async {
     try {
       final response = await _apiService.dio.get(
-        '/api/teacher-salaries/history/teacher/$teacherId',
+        '/teacher-salaries/history/teacher/$teacherId',
       );
 
       final List<dynamic> historyJson = response.data as List;
@@ -251,7 +251,7 @@ class TeacherSalaryRepository {
   }) async {
     try {
       final response = await _apiService.dio.get(
-        '/api/teacher-salaries/remaining/teacher/$teacherId',
+        '/teacher-salaries/remaining/teacher/$teacherId',
         queryParameters: {
           'year': year,
           'month': month,
@@ -273,7 +273,7 @@ class TeacherSalaryRepository {
   Future<void> deleteSalaryPayment(int paymentId) async {
     try {
       await _apiService.dio.delete(
-        '/api/teacher-salaries/payments/$paymentId',
+        '/teacher-salaries/payments/$paymentId',
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
