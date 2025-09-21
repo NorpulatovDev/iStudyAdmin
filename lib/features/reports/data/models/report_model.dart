@@ -5,115 +5,148 @@ import 'package:json_annotation/json_annotation.dart';
 part 'report_model.g.dart';
 
 @JsonSerializable()
-class ReportModel extends Equatable {
+class PaymentReportModel extends Equatable {
   final String type;
-  final int? branchId;
-  final DateTime? date;
-  final DateTime? startDate;
-  final DateTime? endDate;
   final int? year;
   final int? month;
-  final double? totalPayments;
-  final double? totalExpenses;
-  final double? totalSalaries;
-  final double? totalIncome;
-  final double? totalCosts;
-  final double? netProfit;
+  final String? date;
+  final String? startDate;
+  final String? endDate;
+  final int branchId;
+  final double totalPayments;
 
-  const ReportModel({
+  const PaymentReportModel({
     required this.type,
-    this.branchId,
+    this.year,
+    this.month,
     this.date,
     this.startDate,
     this.endDate,
-    this.year,
-    this.month,
-    this.totalPayments,
-    this.totalExpenses,
-    this.totalSalaries,
-    this.totalIncome,
-    this.totalCosts,
-    this.netProfit,
+    required this.branchId,
+    required this.totalPayments,
   });
 
-  factory ReportModel.fromJson(Map<String, dynamic> json) =>
-      _$ReportModelFromJson(json);
+  factory PaymentReportModel.fromJson(Map<String, dynamic> json) =>
+      _$PaymentReportModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$ReportModelToJson(this);
-
-  // Helper getters for specific report types
-  bool get isPaymentReport => type.contains('PAYMENT');
-  bool get isExpenseReport => type.contains('EXPENSE');
-  bool get isSalaryReport => type.contains('SALARY');
-  bool get isFinancialSummary => type.contains('FINANCIAL_SUMMARY');
-  bool get isDailyReport => type.contains('DAILY');
-  bool get isMonthlyReport => type.contains('MONTHLY');
-  bool get isRangeReport => type.contains('RANGE');
-
-  String get formattedPeriod {
-    if (date != null) {
-      return '${date!.day}/${date!.month}/${date!.year}';
-    } else if (year != null && month != null) {
-      final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
-      return '${months[month! - 1]} $year';
-    } else if (startDate != null && endDate != null) {
-      return '${startDate!.day}/${startDate!.month}/${startDate!.year} - ${endDate!.day}/${endDate!.month}/${endDate!.year}';
-    }
-    return 'N/A';
-  }
+  Map<String, dynamic> toJson() => _$PaymentReportModelToJson(this);
 
   @override
   List<Object?> get props => [
         type,
-        branchId,
+        year,
+        month,
         date,
         startDate,
         endDate,
+        branchId,
+        totalPayments,
+      ];
+}
+
+@JsonSerializable()
+class ExpenseReportModel extends Equatable {
+  final String type;
+  final int? year;
+  final int? month;
+  final String? date;
+  final String? startDate;
+  final String? endDate;
+  final int branchId;
+  final double regularExpenses;
+  final double salaryExpenses;
+  final double totalExpenses;
+
+  const ExpenseReportModel({
+    required this.type,
+    this.year,
+    this.month,
+    this.date,
+    this.startDate,
+    this.endDate,
+    required this.branchId,
+    required this.regularExpenses,
+    required this.salaryExpenses,
+    required this.totalExpenses,
+  });
+
+  factory ExpenseReportModel.fromJson(Map<String, dynamic> json) =>
+      _$ExpenseReportModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ExpenseReportModelToJson(this);
+
+  @override
+  List<Object?> get props => [
+        type,
         year,
         month,
-        totalPayments,
+        date,
+        startDate,
+        endDate,
+        branchId,
+        regularExpenses,
+        salaryExpenses,
         totalExpenses,
-        totalSalaries,
+      ];
+}
+
+@JsonSerializable()
+class FinancialSummaryModel extends Equatable {
+  final String type;
+  final int? year;
+  final int? month;
+  final String? startDate;
+  final String? endDate;
+  final int branchId;
+  final double totalIncome;
+  final double regularExpenses;
+  final double salaryPayments;
+  final double totalExpenses;
+  final double netProfit;
+
+  const FinancialSummaryModel({
+    required this.type,
+    this.year,
+    this.month,
+    this.startDate,
+    this.endDate,
+    required this.branchId,
+    required this.totalIncome,
+    required this.regularExpenses,
+    required this.salaryPayments,
+    required this.totalExpenses,
+    required this.netProfit,
+  });
+
+  factory FinancialSummaryModel.fromJson(Map<String, dynamic> json) =>
+      _$FinancialSummaryModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$FinancialSummaryModelToJson(this);
+
+  @override
+  List<Object?> get props => [
+        type,
+        year,
+        month,
+        startDate,
+        endDate,
+        branchId,
         totalIncome,
-        totalCosts,
+        regularExpenses,
+        salaryPayments,
+        totalExpenses,
         netProfit,
       ];
 }
 
-// Specific model for dashboard stats
-@JsonSerializable()
-class DashboardStatsModel extends Equatable {
-  final int totalBranches;
-  final int totalUsers;
-  final int totalStudents;
-  final int totalTeachers;
-  final double monthlyRevenue;
-  final double totalRevenue;
+enum ReportPeriod {
+  daily,
+  monthly,
+  range,
+}
 
-  const DashboardStatsModel({
-    required this.totalBranches,
-    required this.totalUsers,
-    required this.totalStudents,
-    required this.totalTeachers,
-    required this.monthlyRevenue,
-    required this.totalRevenue,
-  });
-
-  factory DashboardStatsModel.fromJson(Map<String, dynamic> json) =>
-      _$DashboardStatsModelFromJson(json);
-
-  Map<String, dynamic> toJson() => _$DashboardStatsModelToJson(this);
-
-  @override
-  List<Object> get props => [
-        totalBranches,
-        totalUsers,
-        totalStudents,
-        totalTeachers,
-        monthlyRevenue,
-        totalRevenue,
-      ];
+enum ReportType {
+  payment,
+  expense,
+  financial,
 }

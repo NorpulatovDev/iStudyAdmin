@@ -60,7 +60,12 @@ class AppDrawer extends StatelessWidget {
     DrawerItem(
       icon: Icons.analytics_outlined,
       title: 'Salary',
-      subtitle: 'Analytics & reports',
+      subtitle: 'Salary Management',
+    ),
+    DrawerItem(
+      icon: Icons.analytics_outlined,
+      title: 'Expenses',
+      subtitle: 'Expense Management',
     ),
   ];
 

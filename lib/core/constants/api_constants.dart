@@ -39,7 +39,8 @@ class ApiConstants {
   static const String paymentsEndpoint = '/payments';
 
   // Expense endpoints
-  static const String expensesEndpoint = '/api/expenses';
+  
+  static const String expensesEndpoint = '/expenses';
 
   // Report endpoints
   static const String reportsEndpoint = '/reports';

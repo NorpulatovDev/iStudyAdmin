@@ -125,7 +125,7 @@ Map<String, dynamic> _$TeacherSalaryHistoryModelToJson(
       'totalSalary': instance.totalSalary,
       'totalPaid': instance.totalPaid,
       'remainingAmount': instance.remainingAmount,
-      'isFullyPaid': instance.fullyPaid,
+      'fullyPaid': instance.fullyPaid,
       'lastPaymentDate': instance.lastPaymentDate?.toIso8601String(),
       'paymentCount': instance.paymentCount,
     };

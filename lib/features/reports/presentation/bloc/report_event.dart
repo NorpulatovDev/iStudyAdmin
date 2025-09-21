@@ -1,175 +1,88 @@
 // lib/features/reports/presentation/bloc/report_event.dart
 part of 'report_bloc.dart';
 
-sealed class ReportEvent extends Equatable {
-  const ReportEvent();
-
+abstract class ReportEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class DashboardStatsRequested extends ReportEvent {
-  const DashboardStatsRequested();
-}
-
-class PaymentReportRequested extends ReportEvent {
-  final int branchId;
-  final PaymentReportType reportType;
-  final DateTime? date;
-  final int? year;
-  final int? month;
-  final DateTime? startDate;
-  final DateTime? endDate;
-
-  const PaymentReportRequested({
-    required this.branchId,
-    required this.reportType,
-    this.date,
-    this.year,
-    this.month,
-    this.startDate,
-    this.endDate,
-  });
-
+// Payment Report Events
+class LoadDailyPaymentReport extends ReportEvent {
+  final DateTime date;
+  
+  LoadDailyPaymentReport({required this.date});
+  
   @override
-  List<Object?> get props => [
-        branchId,
-        reportType,
-        date,
-        year,
-        month,
-        startDate,
-        endDate,
-      ];
+  List<Object?> get props => [date];
 }
 
-class ExpenseReportRequested extends ReportEvent {
-  final int branchId;
-  final ExpenseReportType reportType;
-  final DateTime? date;
-  final int? year;
-  final int? month;
-  final DateTime? startDate;
-  final DateTime? endDate;
-
-  const ExpenseReportRequested({
-    required this.branchId,
-    required this.reportType,
-    this.date,
-    this.year,
-    this.month,
-    this.startDate,
-    this.endDate,
-  });
-
+class LoadMonthlyPaymentReport extends ReportEvent {
+  final int year;
+  final int month;
+  
+  LoadMonthlyPaymentReport({required this.year, required this.month});
+  
   @override
-  List<Object?> get props => [
-        branchId,
-        reportType,
-        date,
-        year,
-        month,
-        startDate,
-        endDate,
-      ];
+  List<Object?> get props => [year, month];
 }
 
-class SalaryReportRequested extends ReportEvent {
-  final int branchId;
-  final SalaryReportType reportType;
-  final int? year;
-  final int? month;
-  final int? startYear;
-  final int? startMonth;
-  final int? endYear;
-  final int? endMonth;
-
-  const SalaryReportRequested({
-    required this.branchId,
-    required this.reportType,
-    this.year,
-    this.month,
-    this.startYear,
-    this.startMonth,
-    this.endYear,
-    this.endMonth,
-  });
-
+class LoadPaymentRangeReport extends ReportEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+  
+  LoadPaymentRangeReport({required this.startDate, required this.endDate});
+  
   @override
-  List<Object?> get props => [
-        branchId,
-        reportType,
-        year,
-        month,
-        startYear,
-        startMonth,
-        endYear,
-        endMonth,
-      ];
+  List<Object?> get props => [startDate, endDate];
 }
 
-class FinancialSummaryRequested extends ReportEvent {
-  final int branchId;
-  final int? year;
-  final int? month;
-  final DateTime? startDate;
-  final DateTime? endDate;
-
-  const FinancialSummaryRequested({
-    required this.branchId,
-    this.year,
-    this.month,
-    this.startDate,
-    this.endDate,
-  });
-
+// Expense Report Events
+class LoadDailyExpenseReport extends ReportEvent {
+  final DateTime date;
+  
+  LoadDailyExpenseReport({required this.date});
+  
   @override
-  List<Object?> get props => [
-        branchId,
-        year,
-        month,
-        startDate,
-        endDate,
-      ];
+  List<Object?> get props => [date];
 }
 
-class ReportRefreshRequested extends ReportEvent {
-  final bool refreshDashboard;
-  final bool refreshFinancialSummary;
-  final int? year;
-  final int? month;
-
-  const ReportRefreshRequested({
-    this.refreshDashboard = false,
-    this.refreshFinancialSummary = false,
-    this.year,
-    this.month,
-  });
-
+class LoadMonthlyExpenseReport extends ReportEvent {
+  final int year;
+  final int month;
+  
+  LoadMonthlyExpenseReport({required this.year, required this.month});
+  
   @override
-  List<Object?> get props => [
-        refreshDashboard,
-        refreshFinancialSummary,
-        year,
-        month,
-      ];
+  List<Object?> get props => [year, month];
 }
 
-// Enums for report types
-enum PaymentReportType {
-  daily,
-  monthly,
-  range,
+class LoadExpenseRangeReport extends ReportEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+  
+  LoadExpenseRangeReport({required this.startDate, required this.endDate});
+  
+  @override
+  List<Object?> get props => [startDate, endDate];
 }
 
-enum ExpenseReportType {
-  daily,
-  monthly,
-  range,
-  allTime,
+// Financial Summary Events
+class LoadFinancialSummary extends ReportEvent {
+  final int year;
+  final int month;
+  
+  LoadFinancialSummary({required this.year, required this.month});
+  
+  @override
+  List<Object?> get props => [year, month];
 }
 
-enum SalaryReportType {
-  monthly,
-  range,
+class LoadFinancialSummaryRange extends ReportEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+  
+  LoadFinancialSummaryRange({required this.startDate, required this.endDate});
+  
+  @override
+  List<Object?> get props => [startDate, endDate];
 }

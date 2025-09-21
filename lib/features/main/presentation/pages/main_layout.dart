@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:istudyadmin/features/courses/presentation/pages/courses_page.dart';
+import 'package:istudyadmin/features/expenses/presentation/pages/expenses_management_page.dart';
 import 'package:istudyadmin/features/salary/presentation/pages/salary_management_page.dart';
 import 'package:istudyadmin/features/teachers/presentation/pages/teachers_page.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -34,6 +35,7 @@ class _MainLayoutState extends State<MainLayout> {
     // const GroupDetailsPage(), // Groups from drawer - shows all branch groups
     const PaymentsPage(),
     const SalaryPage(),
+    const ExpensesPage(),
   ];
 
   final List<String> _pageTitles = [
@@ -43,7 +45,8 @@ class _MainLayoutState extends State<MainLayout> {
     'Teachers',
     // 'Groups',
     'Payments',
-    'Reports',
+    'Salaries',
+    'Expenses',
   ];
 
   void _onDrawerItemTapped(int index) {

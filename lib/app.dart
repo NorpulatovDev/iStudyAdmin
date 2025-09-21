@@ -1,6 +1,8 @@
 // lib/app.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:istudyadmin/features/expenses/data/repositories/expense_repository.dart';
+import 'package:istudyadmin/features/expenses/presentation/bloc/expense_bloc.dart';
 import 'package:istudyadmin/features/salary/data/repositories/teacher_salary_repository.dart';
 import 'package:istudyadmin/features/salary/presentation/bloc/teacher_salary_bloc.dart';
 import './core/injection/injection_container.dart';
@@ -54,6 +56,9 @@ class App extends StatelessWidget {
         BlocProvider(
           create: (context) => TeacherSalaryBloc(sl<TeacherSalaryRepository>()),
         ),
+        BlocProvider(
+          create: (context) => ExpenseBloc(sl<ExpenseRepository>()),
+        ),
       ],
       child: MaterialApp(
         title: "iStudy Admin",
@@ -95,7 +100,7 @@ class App extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // App Title
                       const Text(
                         'iStudy Admin',
@@ -106,14 +111,14 @@ class App extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      
+
                       // Loading Indicator
                       const CircularProgressIndicator(
                         color: AppTheme.primaryColor,
                         strokeWidth: 3,
                       ),
                       const SizedBox(height: 16),
-                      
+
                       Text(
                         'Loading...',
                         style: TextStyle(

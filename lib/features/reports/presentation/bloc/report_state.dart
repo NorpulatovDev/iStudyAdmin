@@ -1,49 +1,47 @@
 // lib/features/reports/presentation/bloc/report_state.dart
 part of 'report_bloc.dart';
 
-sealed class ReportState extends Equatable {
-  const ReportState();
-
+abstract class ReportState extends Equatable {
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-final class ReportInitial extends ReportState {}
+class ReportInitial extends ReportState {}
 
-final class ReportLoading extends ReportState {}
+class ReportLoading extends ReportState {}
 
-final class DashboardStatsLoaded extends ReportState {
-  final DashboardStatsModel stats;
-
-  const DashboardStatsLoaded(this.stats);
-
+class PaymentReportLoaded extends ReportState {
+  final PaymentReportModel report;
+  
+  PaymentReportLoaded({required this.report});
+  
   @override
-  List<Object> get props => [stats];
+  List<Object?> get props => [report];
 }
 
-final class ReportLoaded extends ReportState {
-  final ReportModel report;
-
-  const ReportLoaded(this.report);
-
+class ExpenseReportLoaded extends ReportState {
+  final ExpenseReportModel report;
+  
+  ExpenseReportLoaded({required this.report});
+  
   @override
-  List<Object> get props => [report];
+  List<Object?> get props => [report];
 }
 
-final class ReportError extends ReportState {
+class FinancialSummaryLoaded extends ReportState {
+  final FinancialSummaryModel summary;
+  
+  FinancialSummaryLoaded({required this.summary});
+  
+  @override
+  List<Object?> get props => [summary];
+}
+
+class ReportError extends ReportState {
   final String message;
-
-  const ReportError(this.message);
-
+  
+  ReportError({required this.message});
+  
   @override
-  List<Object> get props => [message];
-}
-
-final class ReportsHistoryLoaded extends ReportState {
-  final List<ReportModel> reports;
-
-  const ReportsHistoryLoaded(this.reports);
-
-  @override
-  List<Object> get props => [reports];
+  List<Object?> get props => [message];
 }

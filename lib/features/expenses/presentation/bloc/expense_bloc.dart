@@ -1,4 +1,3 @@
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../data/models/expense_model.dart';
@@ -9,10 +8,8 @@ part 'expense_state.dart';
 
 class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   final ExpenseRepository _repository;
-  
-  ExpenseBloc({required ExpenseRepository repository})
-      : _repository = repository,
-        super(ExpenseInitial()) {
+
+  ExpenseBloc(this._repository) : super(ExpenseInitial()) {
     on<LoadExpenses>(_onLoadExpenses);
     on<LoadMonthlyExpenses>(_onLoadMonthlyExpenses);
     on<LoadDailyExpenses>(_onLoadDailyExpenses);
@@ -20,8 +17,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     on<UpdateExpense>(_onUpdateExpense);
     on<DeleteExpense>(_onDeleteExpense);
   }
-  
-  Future<void> _onLoadExpenses(LoadExpenses event, Emitter<ExpenseState> emit) async {
+
+  Future<void> _onLoadExpenses(
+      LoadExpenses event, Emitter<ExpenseState> emit) async {
     try {
       emit(ExpenseLoading());
       final expenses = await _repository.getExpensesByBranch();
@@ -30,8 +28,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(ExpenseError(message: e.toString()));
     }
   }
-  
-  Future<void> _onLoadMonthlyExpenses(LoadMonthlyExpenses event, Emitter<ExpenseState> emit) async {
+
+  Future<void> _onLoadMonthlyExpenses(
+      LoadMonthlyExpenses event, Emitter<ExpenseState> emit) async {
     try {
       emit(ExpenseLoading());
       final expenses = await _repository.getExpensesByMonth(
@@ -47,8 +46,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(ExpenseError(message: e.toString()));
     }
   }
-  
-  Future<void> _onLoadDailyExpenses(LoadDailyExpenses event, Emitter<ExpenseState> emit) async {
+
+  Future<void> _onLoadDailyExpenses(
+      LoadDailyExpenses event, Emitter<ExpenseState> emit) async {
     try {
       emit(ExpenseLoading());
       final expenses = await _repository.getExpensesByDate(date: event.date);
@@ -58,8 +58,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(ExpenseError(message: e.toString()));
     }
   }
-  
-  Future<void> _onCreateExpense(CreateExpense event, Emitter<ExpenseState> emit) async {
+
+  Future<void> _onCreateExpense(
+      CreateExpense event, Emitter<ExpenseState> emit) async {
     try {
       emit(ExpenseLoading());
       await _repository.createExpense(
@@ -72,8 +73,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(ExpenseError(message: e.toString()));
     }
   }
-  
-  Future<void> _onUpdateExpense(UpdateExpense event, Emitter<ExpenseState> emit) async {
+
+  Future<void> _onUpdateExpense(
+      UpdateExpense event, Emitter<ExpenseState> emit) async {
     try {
       emit(ExpenseLoading());
       await _repository.updateExpense(
@@ -87,8 +89,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(ExpenseError(message: e.toString()));
     }
   }
-  
-  Future<void> _onDeleteExpense(DeleteExpense event, Emitter<ExpenseState> emit) async {
+
+  Future<void> _onDeleteExpense(
+      DeleteExpense event, Emitter<ExpenseState> emit) async {
     try {
       emit(ExpenseLoading());
       await _repository.deleteExpense(event.id);

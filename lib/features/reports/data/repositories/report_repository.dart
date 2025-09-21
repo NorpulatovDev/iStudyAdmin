@@ -24,298 +24,266 @@ class ReportRepository {
     }
   }
 
-  // Dashboard Stats
-  Future<DashboardStatsModel> getDashboardStats() async {
-    try {
-      final response = await _apiService.dio.get(
-        ApiConstants.dashboardStatsEndpoint,
-      );
-
-      return DashboardStatsModel.fromJson(response.data);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception('Unauthorized. Please login again.');
-      } else if (e.response?.statusCode == 403) {
-        throw Exception('Access denied. Insufficient permissions.');
-      }
-      throw Exception('Failed to fetch dashboard stats: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch dashboard stats: $e');
-    }
-  }
-
   // Payment Reports
-  Future<ReportModel> getDailyPaymentReport({
-    required int branchId,
+  Future<PaymentReportModel> getDailyPaymentReport({
     required DateTime date,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/payments/daily",
+        '${ApiConstants.reportsEndpoint}/payments/daily',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'date': date.toIso8601String().split('T')[0],
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return PaymentReportModel.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
-        throw Exception('Access denied to this branch reports.');
+        throw Exception('Access denied to payment reports.');
       }
-      throw Exception('Failed to fetch daily payment report: ${e.message}');
+      throw Exception('Failed to get daily payment report: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch daily payment report: $e');
+      throw Exception('Failed to get daily payment report: $e');
     }
   }
 
-  Future<ReportModel> getMonthlyPaymentReport({
-    required int branchId,
+  Future<PaymentReportModel> getMonthlyPaymentReport({
     required int year,
     required int month,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/payments/monthly",
+        '${ApiConstants.reportsEndpoint}/payments/monthly',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'year': year,
           'month': month,
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return PaymentReportModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch monthly payment report: ${e.message}');
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to payment reports.');
+      }
+      throw Exception('Failed to get monthly payment report: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch monthly payment report: $e');
+      throw Exception('Failed to get monthly payment report: $e');
     }
   }
 
-  Future<ReportModel> getPaymentRangeReport({
-    required int branchId,
+  Future<PaymentReportModel> getPaymentRangeReport({
     required DateTime startDate,
     required DateTime endDate,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/payments/range",
+        '${ApiConstants.reportsEndpoint}/payments/range',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'startDate': startDate.toIso8601String().split('T')[0],
           'endDate': endDate.toIso8601String().split('T')[0],
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return PaymentReportModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch payment range report: ${e.message}');
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to payment reports.');
+      }
+      throw Exception('Failed to get payment range report: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch payment range report: $e');
+      throw Exception('Failed to get payment range report: $e');
     }
   }
 
   // Expense Reports
-  Future<ReportModel> getDailyExpenseReport({
-    required int branchId,
+  Future<ExpenseReportModel> getDailyExpenseReport({
     required DateTime date,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/expenses/daily",
+        '${ApiConstants.reportsEndpoint}/expenses/daily',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'date': date.toIso8601String().split('T')[0],
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return ExpenseReportModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch daily expense report: ${e.message}');
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to expense reports.');
+      }
+      throw Exception('Failed to get daily expense report: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch daily expense report: $e');
+      throw Exception('Failed to get daily expense report: $e');
     }
   }
 
-  Future<ReportModel> getMonthlyExpenseReport({
-    required int branchId,
+  Future<ExpenseReportModel> getMonthlyExpenseReport({
     required int year,
     required int month,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/expenses/monthly",
+        '${ApiConstants.reportsEndpoint}/expenses/monthly',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'year': year,
           'month': month,
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return ExpenseReportModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch monthly expense report: ${e.message}');
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to expense reports.');
+      }
+      throw Exception('Failed to get monthly expense report: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch monthly expense report: $e');
+      throw Exception('Failed to get monthly expense report: $e');
     }
   }
 
-  Future<ReportModel> getExpenseRangeReport({
-    required int branchId,
+  Future<ExpenseReportModel> getExpenseRangeReport({
     required DateTime startDate,
     required DateTime endDate,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/expenses/range",
+        '${ApiConstants.reportsEndpoint}/expenses/range',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'startDate': startDate.toIso8601String().split('T')[0],
           'endDate': endDate.toIso8601String().split('T')[0],
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return ExpenseReportModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch expense range report: ${e.message}');
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to expense reports.');
+      }
+      throw Exception('Failed to get expense range report: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch expense range report: $e');
-    }
-  }
-
-  Future<ReportModel> getAllTimeExpenseReport({required int branchId}) async {
-    try {
-      final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/expenses/all-time",
-        queryParameters: {'branchId': branchId},
-      );
-
-      return ReportModel.fromJson(response.data);
-    } on DioException catch (e) {
-      throw Exception('Failed to fetch all-time expense report: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch all-time expense report: $e');
-    }
-  }
-
-  // Salary Reports
-  Future<ReportModel> getMonthlySalaryReport({
-    required int branchId,
-    required int year,
-    required int month,
-  }) async {
-    try {
-      final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/salaries/monthly",
-        queryParameters: {
-          'branchId': branchId,
-          'year': year,
-          'month': month,
-        },
-      );
-
-      return ReportModel.fromJson(response.data);
-    } on DioException catch (e) {
-      throw Exception('Failed to fetch monthly salary report: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch monthly salary report: $e');
-    }
-  }
-
-  Future<ReportModel> getSalaryRangeReport({
-    required int branchId,
-    required int startYear,
-    required int startMonth,
-    required int endYear,
-    required int endMonth,
-  }) async {
-    try {
-      final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/salaries/range",
-        queryParameters: {
-          'branchId': branchId,
-          'startYear': startYear,
-          'startMonth': startMonth,
-          'endYear': endYear,
-          'endMonth': endMonth,
-        },
-      );
-
-      return ReportModel.fromJson(response.data);
-    } on DioException catch (e) {
-      throw Exception('Failed to fetch salary range report: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch salary range report: $e');
+      throw Exception('Failed to get expense range report: $e');
     }
   }
 
   // Financial Summary Reports
-  Future<ReportModel> getFinancialSummary({
-    required int branchId,
+  Future<FinancialSummaryModel> getFinancialSummary({
     required int year,
     required int month,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/financial/summary",
+        '${ApiConstants.reportsEndpoint}/financial/summary',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'year': year,
           'month': month,
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return FinancialSummaryModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch financial summary: ${e.message}');
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to financial summary.');
+      }
+      throw Exception('Failed to get financial summary: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch financial summary: $e');
+      throw Exception('Failed to get financial summary: $e');
     }
   }
 
-  Future<ReportModel> getFinancialSummaryRange({
-    required int branchId,
+  Future<FinancialSummaryModel> getFinancialSummaryRange({
     required DateTime startDate,
     required DateTime endDate,
+    int? branchId,
   }) async {
     try {
+      final user = await _getCurrentUser();
+      final targetBranchId = branchId ?? user?.branchId;
+
+      if (targetBranchId == null) {
+        throw Exception('Branch ID is required. Please login again.');
+      }
+
       final response = await _apiService.dio.get(
-        "${ApiConstants.reportsEndpoint}/financial/summary-range",
+        '${ApiConstants.reportsEndpoint}/financial/summary-range',
         queryParameters: {
-          'branchId': branchId,
+          'branchId': targetBranchId,
           'startDate': startDate.toIso8601String().split('T')[0],
           'endDate': endDate.toIso8601String().split('T')[0],
         },
       );
 
-      return ReportModel.fromJson(response.data);
+      return FinancialSummaryModel.fromJson(response.data);
     } on DioException catch (e) {
-      throw Exception('Failed to fetch financial summary range: ${e.message}');
+      if (e.response?.statusCode == 403) {
+        throw Exception('Access denied to financial summary.');
+      }
+      throw Exception('Failed to get financial summary range: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch financial summary range: $e');
+      throw Exception('Failed to get financial summary range: $e');
     }
-  }
-
-  // Helper method to get current user's branch reports
-  Future<ReportModel> getCurrentBranchFinancialSummary({
-    int? year,
-    int? month,
-  }) async {
-    final user = await _getCurrentUser();
-    final branchId = user?.branchId;
-    
-    if (branchId == null) {
-      throw Exception('Branch ID is required. Please login again.');
-    }
-
-    final now = DateTime.now();
-    final targetYear = year ?? now.year;
-    final targetMonth = month ?? now.month;
-
-    return getFinancialSummary(
-      branchId: branchId,
-      year: targetYear,
-      month: targetMonth,
-    );
   }
 }
