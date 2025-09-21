@@ -1,126 +1,122 @@
 // lib/features/payments/presentation/bloc/payment_event.dart
 part of 'payment_bloc.dart';
 
-sealed class PaymentEvent extends Equatable {
-  const PaymentEvent();
-
+abstract class PaymentEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class PaymentLoadByBranchRequested extends PaymentEvent {
-  final int? branchId;
+class LoadPayments extends PaymentEvent {}
 
-  const PaymentLoadByBranchRequested({this.branchId});
-
-  @override
-  List<Object?> get props => [branchId];
-}
-
-class PaymentLoadByStudentRequested extends PaymentEvent {
-  final int studentId;
-
-  const PaymentLoadByStudentRequested(this.studentId);
-
-  @override
-  List<Object> get props => [studentId];
-}
-
-class PaymentLoadByDateRangeRequested extends PaymentEvent {
-  final int branchId;
-  final DateTime startDate;
-  final DateTime endDate;
-
-  const PaymentLoadByDateRangeRequested({
-    required this.branchId,
-    required this.startDate,
-    required this.endDate,
-  });
-
-  @override
-  List<Object> get props => [branchId, startDate, endDate];
-}
-
-class PaymentLoadByMonthRequested extends PaymentEvent {
-  final int branchId;
-  final int year;
-  final int month;
-
-  const PaymentLoadByMonthRequested({
-    required this.branchId,
-    required this.year,
-    required this.month,
-  });
-
-  @override
-  List<Object> get props => [branchId, year, month];
-}
-
-class PaymentLoadRecentRequested extends PaymentEvent {
-  final int branchId;
-  final int limit;
-
-  const PaymentLoadRecentRequested({
-    required this.branchId,
-    this.limit = 20,
-  });
-
-  @override
-  List<Object> get props => [branchId, limit];
-}
-
-class PaymentSearchRequested extends PaymentEvent {
-  final int branchId;
-  final String studentName;
-
-  const PaymentSearchRequested({
-    required this.branchId,
-    required this.studentName,
-  });
-
-  @override
-  List<Object> get props => [branchId, studentName];
-}
-
-class PaymentCreateRequested extends PaymentEvent {
-  final CreatePaymentRequest request;
-
-  const PaymentCreateRequested({
-    required this.request
-  });
-
-  @override
-  List<Object?> get props => [request];
-}
-
-class PaymentDeleteRequested extends PaymentEvent {
-  final int paymentId;
-
-  const PaymentDeleteRequested({
-    required this.paymentId,
-  });
-
-  @override
-  List<Object> get props => [paymentId];
-}
-
-class PaymentRefreshRequested extends PaymentEvent {
-  final int? branchId;
-  final int? studentId;
-  final DateTime? startDate;
-  final DateTime? endDate;
+class LoadUnpaidStudents extends PaymentEvent {
   final int? year;
   final int? month;
-
-  const PaymentRefreshRequested({
-    this.branchId,
-    this.studentId,
-    this.startDate,
-    this.endDate,
-    this.year,
-    this.month,
-  });
-
+  
+  LoadUnpaidStudents({this.year, this.month});
+  
   @override
-  List<Object?> get props => [branchId, studentId, startDate, endDate, year, month];
+  List<Object?> get props => [year, month];
+}
+
+class LoadPaymentsByDateRange extends PaymentEvent {
+  final DateTime startDate;
+  final DateTime endDate;
+  
+  LoadPaymentsByDateRange({required this.startDate, required this.endDate});
+  
+  @override
+  List<Object?> get props => [startDate, endDate];
+}
+
+class LoadPaymentsByMonth extends PaymentEvent {
+  final int year;
+  final int month;
+  
+  LoadPaymentsByMonth({required this.year, required this.month});
+  
+  @override
+  List<Object?> get props => [year, month];
+}
+
+class LoadRecentPayments extends PaymentEvent {
+  final int limit;
+  
+  LoadRecentPayments({this.limit = 20});
+  
+  @override
+  List<Object?> get props => [limit];
+}
+
+class LoadPaymentsByStudent extends PaymentEvent {
+  final int studentId;
+  
+  LoadPaymentsByStudent({required this.studentId});
+  
+  @override
+  List<Object?> get props => [studentId];
+}
+
+class LoadPaymentById extends PaymentEvent {
+  final int id;
+  
+  LoadPaymentById({required this.id});
+  
+  @override
+  List<Object?> get props => [id];
+}
+
+class CreatePayment extends PaymentEvent {
+  final int studentId;
+  final int groupId;
+  final double amount;
+  final String? description;
+  final int paymentYear;
+  final int paymentMonth;
+  
+  CreatePayment({
+    required this.studentId,
+    required this.groupId,
+    required this.amount,
+    this.description,
+    required this.paymentYear,
+    required this.paymentMonth,
+  });
+  
+  @override
+  List<Object?> get props => [
+        studentId,
+        groupId,
+        amount,
+        description,
+        paymentYear,
+        paymentMonth,
+      ];
+}
+
+class UpdatePaymentAmount extends PaymentEvent {
+  final int id;
+  final double amount;
+  
+  UpdatePaymentAmount({required this.id, required this.amount});
+  
+  @override
+  List<Object?> get props => [id, amount];
+}
+
+class SearchPaymentsByStudentName extends PaymentEvent {
+  final String studentName;
+  
+  SearchPaymentsByStudentName({required this.studentName});
+  
+  @override
+  List<Object?> get props => [studentName];
+}
+
+class DeletePayment extends PaymentEvent {
+  final int id;
+  
+  DeletePayment({required this.id});
+  
+  @override
+  List<Object?> get props => [id];
 }

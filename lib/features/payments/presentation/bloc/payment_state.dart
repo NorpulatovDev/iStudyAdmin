@@ -1,43 +1,56 @@
 // lib/features/payments/presentation/bloc/payment_state.dart
 part of 'payment_bloc.dart';
 
-sealed class PaymentState extends Equatable {
-  const PaymentState();
-
+abstract class PaymentState extends Equatable {
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-final class PaymentInitial extends PaymentState {}
+class PaymentInitial extends PaymentState {}
 
-final class PaymentLoading extends PaymentState {}
+class PaymentLoading extends PaymentState {}
 
-final class PaymentLoaded extends PaymentState {
+class PaymentsLoaded extends PaymentState {
   final List<PaymentModel> payments;
-  final String loadedBy; // 'branch', 'student', 'dateRange', 'month', 'recent', 'search'
-
-  const PaymentLoaded(this.payments, {required this.loadedBy});
-
+  
+  PaymentsLoaded({required this.payments});
+  
   @override
-  List<Object> get props => [payments, loadedBy];
+  List<Object?> get props => [payments];
 }
 
-final class PaymentError extends PaymentState {
-  final String message;
-
-  const PaymentError(this.message);
-
+class UnpaidStudentsLoaded extends PaymentState {
+  final List<UnpaidStudentModel> unpaidStudents;
+  
+  UnpaidStudentsLoaded({required this.unpaidStudents});
+  
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [unpaidStudents];
 }
 
-final class PaymentOperationLoading extends PaymentState {}
-
-final class PaymentOperationSuccess extends PaymentState {
-  final String message;
-
-  const PaymentOperationSuccess(this.message);
-
+class PaymentDetailsLoaded extends PaymentState {
+  final PaymentModel payment;
+  
+  PaymentDetailsLoaded({required this.payment});
+  
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [payment];
+}
+
+class PaymentOperationSuccess extends PaymentState {
+  final String message;
+  
+  PaymentOperationSuccess({required this.message});
+  
+  @override
+  List<Object?> get props => [message];
+}
+
+class PaymentError extends PaymentState {
+  final String message;
+  
+  PaymentError({required this.message});
+  
+  @override
+  List<Object?> get props => [message];
 }

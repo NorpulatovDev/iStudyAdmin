@@ -1,5 +1,5 @@
 // lib/features/payments/presentation/bloc/payment_bloc.dart
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../data/models/payment_model.dart';
 import '../../data/repositories/payment_repository.dart';
@@ -8,199 +8,156 @@ part 'payment_event.dart';
 part 'payment_state.dart';
 
 class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
-  final PaymentRepository _paymentRepository;
-  List<PaymentModel> _allPayments = [];
-
-  PaymentBloc(this._paymentRepository) : super(PaymentInitial()) {
-    on<PaymentLoadByBranchRequested>(_onLoadByBranch);
-    on<PaymentLoadByStudentRequested>(_onLoadByStudent);
-    on<PaymentLoadByDateRangeRequested>(_onLoadByDateRange);
-    on<PaymentLoadByMonthRequested>(_onLoadByMonth);
-    on<PaymentLoadRecentRequested>(_onLoadRecent);
-    on<PaymentSearchRequested>(_onSearchRequested);
-    on<PaymentCreateRequested>(_onCreateRequested);
-    on<PaymentDeleteRequested>(_onDeleteRequested);
-    on<PaymentRefreshRequested>(_onRefreshRequested);
+  final PaymentRepository _repository;
+  
+  PaymentBloc(this._repository)
+      : 
+        super(PaymentInitial()) {
+    on<LoadPayments>(_onLoadPayments);
+    on<LoadUnpaidStudents>(_onLoadUnpaidStudents);
+    on<LoadPaymentsByDateRange>(_onLoadPaymentsByDateRange);
+    on<LoadPaymentsByMonth>(_onLoadPaymentsByMonth);
+    on<LoadRecentPayments>(_onLoadRecentPayments);
+    on<LoadPaymentsByStudent>(_onLoadPaymentsByStudent);
+    on<LoadPaymentById>(_onLoadPaymentById);
+    on<CreatePayment>(_onCreatePayment);
+    on<UpdatePaymentAmount>(_onUpdatePaymentAmount);
+    on<SearchPaymentsByStudentName>(_onSearchPaymentsByStudentName);
+    on<DeletePayment>(_onDeletePayment);
   }
-
-  Future<void> _onLoadByBranch(
-    PaymentLoadByBranchRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentLoading());
-
+  
+  Future<void> _onLoadPayments(LoadPayments event, Emitter<PaymentState> emit) async {
     try {
-      final payments =
-          await _paymentRepository.getPaymentsByBranch(event.branchId);
-      _allPayments = payments;
-      emit(PaymentLoaded(payments, loadedBy: 'branch'));
+      emit(PaymentLoading());
+      final payments = await _repository.getPaymentsByBranch();
+      emit(PaymentsLoaded(payments: payments));
     } catch (e) {
-      emit(PaymentError(e.toString()));
+      emit(PaymentError(message: e.toString()));
     }
   }
-
-  Future<void> _onLoadByStudent(
-    PaymentLoadByStudentRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentLoading());
-
+  
+  Future<void> _onLoadUnpaidStudents(LoadUnpaidStudents event, Emitter<PaymentState> emit) async {
     try {
-      final payments =
-          await _paymentRepository.getPaymentsByStudent(event.studentId);
-      _allPayments = payments;
-      emit(PaymentLoaded(payments, loadedBy: 'student'));
-    } catch (e) {
-      emit(PaymentError(e.toString()));
-    }
-  }
-
-  Future<void> _onLoadByDateRange(
-    PaymentLoadByDateRangeRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentLoading());
-
-    try {
-      final payments = await _paymentRepository.getPaymentsByDateRange(
-        branchId: event.branchId,
-        startDate: event.startDate,
-        endDate: event.endDate,
-      );
-      _allPayments = payments;
-      emit(PaymentLoaded(payments, loadedBy: 'dateRange'));
-    } catch (e) {
-      emit(PaymentError(e.toString()));
-    }
-  }
-
-  Future<void> _onLoadByMonth(
-    PaymentLoadByMonthRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentLoading());
-
-    try {
-      final payments = await _paymentRepository.getPaymentsByMonth(
-        branchId: event.branchId,
+      emit(PaymentLoading());
+      final unpaidStudents = await _repository.getUnpaidStudents(
         year: event.year,
         month: event.month,
       );
-      _allPayments = payments;
-      emit(PaymentLoaded(payments, loadedBy: 'month'));
+      emit(UnpaidStudentsLoaded(unpaidStudents: unpaidStudents));
     } catch (e) {
-      emit(PaymentError(e.toString()));
+      emit(PaymentError(message: e.toString()));
     }
   }
-
-  Future<void> _onLoadRecent(
-    PaymentLoadRecentRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentLoading());
-
+  
+  Future<void> _onLoadPaymentsByDateRange(LoadPaymentsByDateRange event, Emitter<PaymentState> emit) async {
     try {
-      final payments = await _paymentRepository.getRecentPayments(
-        branchId: event.branchId,
-        limit: event.limit,
+      emit(PaymentLoading());
+      final payments = await _repository.getPaymentsByDateRange(
+        startDate: event.startDate,
+        endDate: event.endDate,
       );
-      _allPayments = payments;
-      emit(PaymentLoaded(payments, loadedBy: 'recent'));
+      emit(PaymentsLoaded(payments: payments));
     } catch (e) {
-      emit(PaymentError(e.toString()));
+      emit(PaymentError(message: e.toString()));
     }
   }
-
-  Future<void> _onSearchRequested(
-    PaymentSearchRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentLoading());
-
+  
+  Future<void> _onLoadPaymentsByMonth(LoadPaymentsByMonth event, Emitter<PaymentState> emit) async {
     try {
-      final payments = await _paymentRepository.searchPaymentsByStudentName(
-        branchId: event.branchId,
+      emit(PaymentLoading());
+      final payments = await _repository.getPaymentsByMonth(
+        year: event.year,
+        month: event.month,
+      );
+      emit(PaymentsLoaded(payments: payments));
+    } catch (e) {
+      emit(PaymentError(message: e.toString()));
+    }
+  }
+  
+  Future<void> _onLoadRecentPayments(LoadRecentPayments event, Emitter<PaymentState> emit) async {
+    try {
+      emit(PaymentLoading());
+      final payments = await _repository.getRecentPayments(limit: event.limit);
+      emit(PaymentsLoaded(payments: payments));
+    } catch (e) {
+      emit(PaymentError(message: e.toString()));
+    }
+  }
+  
+  Future<void> _onLoadPaymentsByStudent(LoadPaymentsByStudent event, Emitter<PaymentState> emit) async {
+    try {
+      emit(PaymentLoading());
+      final payments = await _repository.getPaymentsByStudent(event.studentId);
+      emit(PaymentsLoaded(payments: payments));
+    } catch (e) {
+      emit(PaymentError(message: e.toString()));
+    }
+  }
+  
+  Future<void> _onLoadPaymentById(LoadPaymentById event, Emitter<PaymentState> emit) async {
+    try {
+      emit(PaymentLoading());
+      final payment = await _repository.getPaymentById(event.id);
+      emit(PaymentDetailsLoaded(payment: payment));
+    } catch (e) {
+      emit(PaymentError(message: e.toString()));
+    }
+  }
+  
+  Future<void> _onCreatePayment(CreatePayment event, Emitter<PaymentState> emit) async {
+    try {
+      emit(PaymentLoading());
+      
+      final request = CreatePaymentRequest(
+        studentId: event.studentId,
+        groupId: event.groupId,
+        amount: event.amount,
+        description: event.description,
+        branchId: 0, // This will be handled in repository
+        paymentYear: event.paymentYear,
+        paymentMonth: event.paymentMonth,
+      );
+      
+      await _repository.createPayment(request);
+      emit(PaymentOperationSuccess(message: 'Payment created successfully'));
+    } catch (e) {
+      emit(PaymentError(message: e.toString()));
+    }
+  }
+  
+  Future<void> _onUpdatePaymentAmount(UpdatePaymentAmount event, Emitter<PaymentState> emit) async {
+    try {
+      emit(PaymentLoading());
+      await _repository.updatePaymentAmount(
+        id: event.id,
+        amount: event.amount,
+      );
+      emit(PaymentOperationSuccess(message: 'Payment amount updated successfully'));
+    } catch (e) {
+      emit(PaymentError(message: e.toString()));
+    }
+  }
+  
+  Future<void> _onSearchPaymentsByStudentName(SearchPaymentsByStudentName event, Emitter<PaymentState> emit) async {
+    try {
+      emit(PaymentLoading());
+      final payments = await _repository.searchPaymentsByStudentName(
         studentName: event.studentName,
       );
-      _allPayments = payments;
-      emit(PaymentLoaded(payments, loadedBy: 'search'));
+      emit(PaymentsLoaded(payments: payments));
     } catch (e) {
-      emit(PaymentError(e.toString()));
+      emit(PaymentError(message: e.toString()));
     }
   }
-
-  Future<void> _onCreateRequested(
-    PaymentCreateRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentOperationLoading());
-
+  
+  Future<void> _onDeletePayment(DeletePayment event, Emitter<PaymentState> emit) async {
     try {
-      final newPayment =
-          await _paymentRepository.createPayment(request: event.request);
-
-      _allPayments.insert(0, newPayment); // Add to beginning (most recent)
-      emit(const PaymentOperationSuccess('Payment created successfully'));
-      emit(PaymentLoaded(_allPayments, loadedBy: 'branch'));
+      emit(PaymentLoading());
+      await _repository.deletePayment(event.id);
+      emit(PaymentOperationSuccess(message: 'Payment deleted successfully'));
     } catch (e) {
-      emit(PaymentError(e.toString()));
-    }
-  }
-
-  Future<void> _onDeleteRequested(
-    PaymentDeleteRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    emit(PaymentOperationLoading());
-
-    try {
-      await _paymentRepository.deletePayment(event.paymentId);
-
-      // Remove from local list
-      _allPayments.removeWhere((payment) => payment.id == event.paymentId);
-      
-      emit(const PaymentOperationSuccess('Payment deleted successfully'));
-      emit(PaymentLoaded(_allPayments, loadedBy: 'branch'));
-    } catch (e) {
-      emit(PaymentError(e.toString()));
-    }
-  }
-
-  Future<void> _onRefreshRequested(
-    PaymentRefreshRequested event,
-    Emitter<PaymentState> emit,
-  ) async {
-    try {
-      List<PaymentModel> payments;
-      String loadedBy;
-
-      if (event.studentId != null) {
-        payments =
-            await _paymentRepository.getPaymentsByStudent(event.studentId!);
-        loadedBy = 'student';
-      } else if (event.startDate != null && event.endDate != null) {
-        payments = await _paymentRepository.getPaymentsByDateRange(
-          branchId: event.branchId!,
-          startDate: event.startDate!,
-          endDate: event.endDate!,
-        );
-        loadedBy = 'dateRange';
-      } else if (event.year != null && event.month != null) {
-        payments = await _paymentRepository.getPaymentsByMonth(
-          branchId: event.branchId!,
-          year: event.year!,
-          month: event.month!,
-        );
-        loadedBy = 'month';
-      } else {
-        payments = await _paymentRepository.getPaymentsByBranch(event.branchId);
-        loadedBy = 'branch';
-      }
-
-      _allPayments = payments;
-      emit(PaymentLoaded(payments, loadedBy: loadedBy));
-    } catch (e) {
-      emit(PaymentError(e.toString()));
+      emit(PaymentError(message: e.toString()));
     }
   }
 }

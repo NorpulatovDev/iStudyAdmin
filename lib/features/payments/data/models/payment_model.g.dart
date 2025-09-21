@@ -39,6 +39,30 @@ Map<String, dynamic> _$PaymentModelToJson(PaymentModel instance) =>
       'createdAt': instance.createdAt.toIso8601String(),
     };
 
+UnpaidStudentModel _$UnpaidStudentModelFromJson(Map<String, dynamic> json) =>
+    UnpaidStudentModel(
+      id: (json['id'] as num).toInt(),
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      phoneNumber: json['phoneNumber'] as String?,
+      parentPhoneNumber: json['parentPhoneNumber'] as String?,
+      remainingAmount: (json['remainingAmount'] as num).toDouble(),
+      groupName: json['groupName'] as String,
+      groupId: (json['groupId'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$UnpaidStudentModelToJson(UnpaidStudentModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'firstName': instance.firstName,
+      'lastName': instance.lastName,
+      'phoneNumber': instance.phoneNumber,
+      'parentPhoneNumber': instance.parentPhoneNumber,
+      'remainingAmount': instance.remainingAmount,
+      'groupName': instance.groupName,
+      'groupId': instance.groupId,
+    };
+
 CreatePaymentRequest _$CreatePaymentRequestFromJson(
         Map<String, dynamic> json) =>
     CreatePaymentRequest(
@@ -61,4 +85,16 @@ Map<String, dynamic> _$CreatePaymentRequestToJson(
       'branchId': instance.branchId,
       'paymentYear': instance.paymentYear,
       'paymentMonth': instance.paymentMonth,
+    };
+
+UpdatePaymentRequest _$UpdatePaymentRequestFromJson(
+        Map<String, dynamic> json) =>
+    UpdatePaymentRequest(
+      amount: (json['amount'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$UpdatePaymentRequestToJson(
+        UpdatePaymentRequest instance) =>
+    <String, dynamic>{
+      'amount': instance.amount,
     };

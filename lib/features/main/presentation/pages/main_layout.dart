@@ -36,6 +36,7 @@ class _MainLayoutState extends State<MainLayout> {
     const PaymentsPage(),
     const SalaryPage(),
     const ExpensesPage(),
+    const ReportsPage(),
   ];
 
   final List<String> _pageTitles = [
@@ -47,6 +48,7 @@ class _MainLayoutState extends State<MainLayout> {
     'Payments',
     'Salaries',
     'Expenses',
+    'Reports' 
   ];
 
   void _onDrawerItemTapped(int index) {

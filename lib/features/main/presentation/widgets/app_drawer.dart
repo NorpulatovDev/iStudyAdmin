@@ -67,6 +67,11 @@ class AppDrawer extends StatelessWidget {
       title: 'Expenses',
       subtitle: 'Expense Management',
     ),
+    DrawerItem(
+      icon: Icons.analytics_outlined,
+      title: 'Reports',
+      subtitle: 'Report Management',
+    ),
   ];
 
   @override

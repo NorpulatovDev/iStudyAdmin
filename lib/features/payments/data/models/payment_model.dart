@@ -26,8 +26,8 @@ class PaymentModel extends Equatable {
     required this.studentName,
     required this.courseId,
     required this.courseName,
-    required this.groupId,
-    required this.groupName,
+    this.groupId,
+    this.groupName,
     required this.amount,
     this.description,
     required this.status,
@@ -60,6 +60,48 @@ class PaymentModel extends Equatable {
 }
 
 @JsonSerializable()
+class UnpaidStudentModel extends Equatable {
+  final int id;
+  final String firstName;
+  final String lastName;
+  final String? phoneNumber;
+  final String? parentPhoneNumber;
+  final double remainingAmount;
+  final String groupName;
+  final int groupId;
+
+  const UnpaidStudentModel({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    this.phoneNumber,
+    this.parentPhoneNumber,
+    required this.remainingAmount,
+    required this.groupName,
+    required this.groupId,
+  });
+
+  factory UnpaidStudentModel.fromJson(Map<String, dynamic> json) =>
+      _$UnpaidStudentModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UnpaidStudentModelToJson(this);
+
+  String get fullName => '$firstName $lastName';
+
+  @override
+  List<Object?> get props => [
+        id,
+        firstName,
+        lastName,
+        phoneNumber,
+        parentPhoneNumber,
+        remainingAmount,
+        groupName,
+        groupId,
+      ];
+}
+
+@JsonSerializable()
 class CreatePaymentRequest extends Equatable {
   final int studentId;
   final int groupId;
@@ -79,6 +121,9 @@ class CreatePaymentRequest extends Equatable {
     required this.paymentMonth,
   });
 
+  factory CreatePaymentRequest.fromJson(Map<String, dynamic> json) =>
+      _$CreatePaymentRequestFromJson(json);
+
   Map<String, dynamic> toJson() => _$CreatePaymentRequestToJson(this);
 
   @override
@@ -91,4 +136,19 @@ class CreatePaymentRequest extends Equatable {
         paymentYear,
         paymentMonth,
       ];
+}
+
+@JsonSerializable()
+class UpdatePaymentRequest extends Equatable {
+  final double amount;
+
+  const UpdatePaymentRequest({required this.amount});
+
+  factory UpdatePaymentRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdatePaymentRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UpdatePaymentRequestToJson(this);
+
+  @override
+  List<Object?> get props => [amount];
 }
