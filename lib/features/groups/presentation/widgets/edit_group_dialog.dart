@@ -1,3 +1,5 @@
+// lib/features/groups/presentation/widgets/edit_group_dialog.dart - Simple working version
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/group_bloc.dart';
@@ -31,10 +33,39 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
   @override
   void initState() {
     super.initState();
+    _initializeData();
+  }
+
+  void _initializeData() {
     _nameController.text = widget.group.name;
     _selectedTeacherId = widget.group.teacherId;
-    // TODO: Parse startTime, endTime, and daysOfWeek from group model if available
-    // This would depend on your GroupModel having these fields
+    _selectedDays = List.from(widget.group.daysOfWeek);
+    
+    // Parse existing times if available
+    _startTime = _parseTimeString(widget.group.startTime);
+    _endTime = _parseTimeString(widget.group.endTime);
+  }
+
+  TimeOfDay? _parseTimeString(String timeString) {
+    if (timeString.isEmpty) return null;
+    
+    try {
+      final parts = timeString.split(':');
+      if (parts.length >= 2) {
+        return TimeOfDay(
+          hour: int.parse(parts[0]),
+          minute: int.parse(parts[1]),
+        );
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return null;
+  }
+
+  String _formatTimeOfDay(TimeOfDay? time) {
+    if (time == null) return '';
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -45,33 +76,24 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isDesktop = screenWidth > 800;
-    final isTablet = screenWidth > 600 && screenWidth <= 800;
-    
     return Dialog(
-      insetPadding: EdgeInsets.all(isDesktop ? 40 : 16),
+      insetPadding: const EdgeInsets.all(16),
       child: Container(
         width: double.infinity,
-        height: isDesktop ? null : screenHeight * 0.9,
-        constraints: BoxConstraints(
-          maxWidth: isDesktop ? 600 : double.infinity,
-          maxHeight: isDesktop ? 700 : double.infinity,
-        ),
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(context),
-            Expanded(child: _buildForm(context, isDesktop, isTablet)),
-            _buildActionButtons(context, isDesktop),
+            _buildHeader(),
+            Expanded(child: _buildForm()),
+            _buildActionButtons(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -86,14 +108,26 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
         children: [
           const Icon(Icons.edit, color: Colors.white),
           const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Edit Group',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Edit Group',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  widget.group.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
             ),
           ),
           IconButton(
@@ -105,9 +139,9 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     );
   }
 
-  Widget _buildForm(BuildContext context, bool isDesktop, bool isTablet) {
+  Widget _buildForm() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(isDesktop ? 24 : 16),
+      padding: const EdgeInsets.all(20),
       child: Form(
         key: _formKey,
         child: Column(
@@ -134,41 +168,47 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
             ),
             const SizedBox(height: 16),
             
-            // Teacher Selection
+            // Teacher Selection (Simple dropdown without dynamic loading)
             DropdownButtonFormField<int>(
               value: _selectedTeacherId,
               decoration: const InputDecoration(
                 labelText: 'Teacher',
                 prefixIcon: Icon(Icons.person),
                 border: OutlineInputBorder(),
+                helperText: 'Leave empty for no teacher assignment',
               ),
-              items: const [], // TODO: Load teachers from API
+              items: [
+                const DropdownMenuItem<int>(
+                  value: null,
+                  child: Text('No teacher assigned'),
+                ),
+                // TODO: Add actual teachers here - for now just keeping current
+                if (widget.group.teacherId != null)
+                  DropdownMenuItem<int>(
+                    value: widget.group.teacherId,
+                    child: Text(widget.group.teacherName ?? 'Current Teacher'),
+                  ),
+              ],
               onChanged: (value) {
                 setState(() {
                   _selectedTeacherId = value;
                 });
               },
-              hint: const Text('Select a teacher (optional)'),
             ),
             const SizedBox(height: 16),
             
-            // Time Selection - Responsive layout
-            if (isDesktop || isTablet)
-              Row(
-                children: [
-                  Expanded(child: _buildTimeField(context, 'Start Time', _startTime, true)),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildTimeField(context, 'End Time', _endTime, false)),
-                ],
-              )
-            else
-              Column(
-                children: [
-                  _buildTimeField(context, 'Start Time', _startTime, true),
-                  const SizedBox(height: 16),
-                  _buildTimeField(context, 'End Time', _endTime, false),
-                ],
-              ),
+            // Time Selection
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTimeField('Start Time', _startTime, true),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildTimeField('End Time', _endTime, false),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             
             // Days of Week Selection
@@ -177,18 +217,58 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            _buildDaysSelection(isDesktop, isTablet),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _daysOfWeek.map((day) => _buildDayChip(day)).toList(),
+            ),
             const SizedBox(height: 16),
             
-            // Group info
-            _buildInfoCard(context),
+            // Current Group Info
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue[200]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.info, color: Colors.blue[700], size: 16),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Group Information',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Course: ${widget.group.courseName}',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                  Text(
+                    'Branch: ${widget.group.branchName}',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                  Text(
+                    'Students: ${widget.group.studentCount}',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTimeField(BuildContext context, String label, TimeOfDay? time, bool isStartTime) {
+  Widget _buildTimeField(String label, TimeOfDay? time, bool isStartTime) {
     return InkWell(
       onTap: () => _selectTime(context, isStartTime),
       child: InputDecorator(
@@ -196,6 +276,20 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
           labelText: label,
           prefixIcon: const Icon(Icons.access_time),
           border: const OutlineInputBorder(),
+          suffixIcon: time != null
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () {
+                    setState(() {
+                      if (isStartTime) {
+                        _startTime = null;
+                      } else {
+                        _endTime = null;
+                      }
+                    });
+                  },
+                )
+              : null,
         ),
         child: Text(
           time?.format(context) ?? 'Select $label',
@@ -205,26 +299,6 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
         ),
       ),
     );
-  }
-
-  Widget _buildDaysSelection(bool isDesktop, bool isTablet) {
-    if (isDesktop) {
-      return Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: _daysOfWeek.map((day) => _buildDayChip(day)).toList(),
-      );
-    } else {
-      return GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: isTablet ? 4 : 3,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: 2.5,
-        children: _daysOfWeek.map((day) => _buildDayChip(day)).toList(),
-      );
-    }
   }
 
   Widget _buildDayChip(String day) {
@@ -247,55 +321,10 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context) {
+  Widget _buildActionButtons() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.info, color: Colors.orange[700], size: 16),
-              const SizedBox(width: 8),
-              const Text(
-                'Current Group Information',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Group ID: ${widget.group.id}',
-            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-          ),
-          Text(
-            'Course: ${widget.group.courseName}',
-            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-          ),
-          Text(
-            'Branch: ${widget.group.branchName}',
-            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-          ),
-          if (widget.group.teacherName != null)
-            Text(
-              'Current Teacher: ${widget.group.teacherName}',
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context, bool isDesktop) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isDesktop ? 24 : 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         border: Border(top: BorderSide(color: Colors.grey[200]!)),
@@ -304,54 +333,36 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
         listener: (context, state) {
           if (state is GroupOperationSuccess) {
             Navigator.of(context).pop();
+          } else if (state is GroupError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
         },
         builder: (context, state) {
           final isLoading = state is GroupOperationLoading;
           
-          return Flex(
-            direction: isDesktop ? Axis.horizontal : Axis.vertical,
-            mainAxisAlignment: isDesktop ? MainAxisAlignment.end : MainAxisAlignment.center,
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (!isDesktop) ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : _submitForm,
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Update Group'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-              ] else ...[
-                TextButton(
-                  onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: isLoading ? null : _submitForm,
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Update Group'),
-                ),
-              ],
+              TextButton(
+                onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: isLoading ? null : _submitForm,
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Update Group'),
+              ),
             ],
           );
         },
@@ -363,16 +374,8 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
     if (!_formKey.currentState!.validate()) return;
 
     final name = _nameController.text.trim();
-    
-    // Format time to HH:mm
-    String? startTime;
-    String? endTime;
-    if (_startTime != null) {
-      startTime = '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}';
-    }
-    if (_endTime != null) {
-      endTime = '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}';
-    }
+    final startTime = _formatTimeOfDay(_startTime);
+    final endTime = _formatTimeOfDay(_endTime);
 
     context.read<GroupBloc>().add(
       GroupUpdateRequested(
@@ -381,18 +384,20 @@ class _EditGroupDialogState extends State<EditGroupDialog> {
         courseId: widget.group.courseId,
         branchId: widget.group.branchId,
         teacherId: _selectedTeacherId,
-        startTime: startTime,
-        endTime: endTime,
+        startTime: startTime.isNotEmpty ? startTime : null,
+        endTime: endTime.isNotEmpty ? endTime : null,
         daysOfWeek: _selectedDays.isNotEmpty ? _selectedDays : null,
       ),
     );
   }
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+    final initialTime = isStartTime ? _startTime : _endTime;
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: initialTime ?? TimeOfDay.now(),
     );
+    
     if (picked != null) {
       setState(() {
         if (isStartTime) {

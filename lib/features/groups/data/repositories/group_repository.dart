@@ -162,6 +162,8 @@ class GroupRepository {
     }
   }
 
+  // lib/features/groups/data/repositories/group_repository.dart - Enhanced updateGroup method
+
   Future<GroupModel> updateGroup({
     required int id,
     required String name,
@@ -174,37 +176,126 @@ class GroupRepository {
     List<String>? daysOfWeek,
   }) async {
     try {
-      final data = {
+      // Build the data object with only the fields that should be updated
+      final data = <String, dynamic>{
         'name': name,
-        if (teacherId != null) 'teacherId': teacherId,
-        if (startTime != null) 'startTime': startTime,
-        if (endTime != null) 'endTime': endTime,
-        if (daysOfWeek != null) 'daysOfWeek': daysOfWeek,
       };
+
+      // Only include optional fields if they are provided
+      if (teacherId != null) {
+        data['teacherId'] = teacherId;
+      }
+
+      if (startTime != null && startTime.isNotEmpty) {
+        data['startTime'] = startTime;
+      }
+
+      if (endTime != null && endTime.isNotEmpty) {
+        data['endTime'] = endTime;
+      }
+
+      if (daysOfWeek != null && daysOfWeek.isNotEmpty) {
+        data['daysOfWeek'] = daysOfWeek;
+      }
+
+      print('Updating group $id with data: $data'); // Debug log
 
       final response = await _apiService.dio.put(
         '${ApiConstants.groupsEndpoint}/$id',
         data: data,
       );
 
+      print('Update response: ${response.data}'); // Debug log
+
       return GroupModel.fromJson(response.data);
     } on DioException catch (e) {
+      print('DioException updating group: ${e.response?.data}'); // Debug log
+      
       if (e.response?.statusCode == 404) {
         throw Exception('Group not found.');
       } else if (e.response?.statusCode == 403) {
         throw Exception('Access denied. Cannot update this group.');
       } else if (e.response?.statusCode == 400) {
         final errorData = e.response?.data;
-        if (errorData != null && errorData['fieldErrors'] != null) {
-          final fieldErrors = errorData['fieldErrors'] as Map;
-          final errorMessage = fieldErrors.values.join(', ');
-          throw Exception('Validation error: $errorMessage');
+        if (errorData != null && errorData is Map) {
+          if (errorData['fieldErrors'] != null) {
+            final fieldErrors = errorData['fieldErrors'] as Map;
+            final errorMessage = fieldErrors.values.join(', ');
+            throw Exception('Validation error: $errorMessage');
+          } else if (errorData['message'] != null) {
+            throw Exception(errorData['message']);
+          }
         }
         throw Exception('Invalid group data provided.');
       }
       throw Exception('Failed to update group: ${e.message}');
     } catch (e) {
+      print('General exception updating group: $e'); // Debug log
       throw Exception('Failed to update group: $e');
+    }
+  }
+
+  // Enhanced addStudentsToGroup method
+  Future<void> addStudentsToGroup(int groupId, int studentId) async {
+    try {
+      print('Adding student $studentId to group $groupId'); // Debug log
+
+      final response = await _apiService.dio.post(
+        '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
+      );
+
+      print('Add student response: ${response.statusCode}'); // Debug log
+    } on DioException catch (e) {
+      print('DioException adding student: ${e.response?.data}'); // Debug log
+      
+      if (e.response?.statusCode == 404) {
+        throw Exception('Group or student not found.');
+      } else if (e.response?.statusCode == 403) {
+        throw Exception('Access denied. Cannot add students to this group.');
+      } else if (e.response?.statusCode == 400) {
+        final errorData = e.response?.data;
+        if (errorData != null && errorData['message'] != null) {
+          throw Exception(errorData['message']);
+        }
+        throw Exception('Student may already be in the group or invalid request.');
+      } else if (e.response?.statusCode == 409) {
+        throw Exception('Student is already enrolled in this group.');
+      }
+      throw Exception('Failed to add student to group: ${e.message}');
+    } catch (e) {
+      print('General exception adding student: $e'); // Debug log
+      throw Exception('Failed to add student to group: $e');
+    }
+  }
+
+  // Enhanced removeStudentFromGroup method  
+  Future<void> removeStudentFromGroup(int groupId, int studentId) async {
+    try {
+      print('Removing student $studentId from group $groupId'); // Debug log
+
+      final response = await _apiService.dio.delete(
+        '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
+      );
+
+      print('Remove student response: ${response.statusCode}'); // Debug log
+    } on DioException catch (e) {
+      print('DioException removing student: ${e.response?.data}'); // Debug log
+      
+      if (e.response?.statusCode == 404) {
+        throw Exception('Group or student not found.');
+      } else if (e.response?.statusCode == 403) {
+        throw Exception('Access denied. Cannot remove student from this group.');
+      } else if (e.response?.statusCode == 400) {
+        final errorData = e.response?.data;
+        if (errorData != null && errorData['message'] != null) {
+          throw Exception(errorData['message']);
+        }
+        throw Exception('Invalid request to remove student.');
+      }
+      throw Exception('Failed to remove student from group: ${e.message}');
+    } catch (e) {
+      print('General exception removing student: $e'); // Debug log
+      throw Exception('Failed to remove student from group: $e');
     }
   }
 
@@ -223,46 +314,46 @@ class GroupRepository {
     }
   }
 
-  Future<void> removeStudentFromGroup(int groupId, int studentId) async {
-    try {
-      await _apiService.dio.delete(
-        '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
-      );
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        throw Exception('Group or student not found.');
-      } else if (e.response?.statusCode == 403) {
-        throw Exception(
-            'Access denied. Cannot remove student from this group.');
-      }
-      throw Exception('Failed to remove student from group: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to remove student from group: $e');
-    }
-  }
+//   Future<void> removeStudentFromGroup(int groupId, int studentId) async {
+//     try {
+//       await _apiService.dio.delete(
+//         '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
+//       );
+//     } on DioException catch (e) {
+//       if (e.response?.statusCode == 404) {
+//         throw Exception('Group or student not found.');
+//       } else if (e.response?.statusCode == 403) {
+//         throw Exception(
+//             'Access denied. Cannot remove student from this group.');
+//       }
+//       throw Exception('Failed to remove student from group: ${e.message}');
+//     } catch (e) {
+//       throw Exception('Failed to remove student from group: $e');
+//     }
+//   }
 
-  Future<void> addStudentsToGroup(int groupId, int studentId) async {
-  try {
+//   Future<void> addStudentsToGroup(int groupId, int studentId) async {
+//   try {
     
 
-    await _apiService.dio.post(
-      '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
-    );
-  } on DioException catch (e) {
-    if (e.response?.statusCode == 404) {
-      throw Exception('Group not found.');
-    } else if (e.response?.statusCode == 403) {
-      throw Exception('Access denied. Cannot add students to this group.');
-    } else if (e.response?.statusCode == 400) {
-      final errorData = e.response?.data;
-      if (errorData != null && errorData['message'] != null) {
-        throw Exception(errorData['message']);
-      }
-      throw Exception('Invalid request. Some students may already be in the group.');
-    }
-    throw Exception('Failed to add students to group: ${e.message}');
-  } catch (e) {
-    throw Exception('Failed to add students to group: $e');
-  }
-}
+//     await _apiService.dio.post(
+//       '${ApiConstants.groupsEndpoint}/$groupId/students/$studentId',
+//     );
+//   } on DioException catch (e) {
+//     if (e.response?.statusCode == 404) {
+//       throw Exception('Group not found.');
+//     } else if (e.response?.statusCode == 403) {
+//       throw Exception('Access denied. Cannot add students to this group.');
+//     } else if (e.response?.statusCode == 400) {
+//       final errorData = e.response?.data;
+//       if (errorData != null && errorData['message'] != null) {
+//         throw Exception(errorData['message']);
+//       }
+//       throw Exception('Invalid request. Some students may already be in the group.');
+//     }
+//     throw Exception('Failed to add students to group: ${e.message}');
+//   } catch (e) {
+//     throw Exception('Failed to add students to group: $e');
+//   }
+// }
 }

@@ -1,3 +1,5 @@
+// lib/features/groups/presentation/pages/group_details_page.dart - Updated to use AddStudentDialog
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../bloc/group_bloc.dart';
 import '../widgets/student_info_table.dart';
 import '../widgets/edit_group_dialog.dart';
+import '../widgets/add_student_dialog.dart';
 import '../../data/models/group_model.dart';
 
 class GroupDetailsPage extends StatefulWidget {
@@ -389,8 +392,7 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
           child: _buildStatCard(
             icon: Icons.schedule_outlined,
             title: 'Schedule',
-            value: group.daysOfWeek
-                .join(","), // TODO: Use actual schedule from group
+            value: group.daysOfWeek.join(","),
             color: Colors.green,
           ),
         ),
@@ -399,8 +401,7 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
           child: _buildStatCard(
             icon: Icons.access_time_outlined,
             title: 'Duration',
-            value:
-                "${group.startTime}/${group.endTime}", // TODO: Calculate from start/end time
+            value: "${group.startTime}/${group.endTime}",
             color: Colors.orange,
           ),
         ),
@@ -853,15 +854,9 @@ class _GroupDetailsPageState extends State<GroupDetailsPage> {
   }
 
   void _showAddStudentDialog(GroupModel group) {
-    // TODO: Implement add student dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Add student functionality - To be implemented'),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AddStudentDialog(group: group),
     );
   }
 }

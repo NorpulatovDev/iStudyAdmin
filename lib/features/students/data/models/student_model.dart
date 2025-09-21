@@ -44,7 +44,7 @@ class StudentModel extends Equatable {
 
   Map<String, dynamic> toJson() => _$StudentModelToJson(this);
 
-  String get fullName => '$firstName $lastName';
+  String get fullName => '$lastName $firstName';
 
   // Convert StudentModel to CreateStudentRequest for editing
   CreateStudentRequest toCreateRequest() {

@@ -59,7 +59,7 @@ class StudentListItem extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        student.firstName.isNotEmpty 
+                        student.firstName.isNotEmpty
                             ? student.firstName[0].toUpperCase()
                             : 'S',
                         style: const TextStyle(
@@ -71,7 +71,7 @@ class StudentListItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Student Info
                   Expanded(
                     child: Column(
@@ -109,7 +109,7 @@ class StudentListItem extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // Actions Menu
                   PopupMenuButton<String>(
                     onSelected: (value) {
@@ -149,7 +149,8 @@ class StudentListItem extends StatelessWidget {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                            Icon(Icons.delete_outline,
+                                size: 18, color: Colors.red),
                             SizedBox(width: 12),
                             Text('Delete', style: TextStyle(color: Colors.red)),
                           ],
@@ -159,9 +160,9 @@ class StudentListItem extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Contact Information
               Row(
                 children: [
@@ -180,18 +181,19 @@ class StudentListItem extends StatelessWidget {
                     child: _buildInfoChip(
                       icon: Icons.calendar_today_outlined,
                       label: 'Joined',
-                      value: DateFormat('MMM dd, yyyy').format(student.createdAt),
+                      value:
+                          DateFormat('MMM dd, yyyy').format(student.createdAt),
                       color: Colors.green,
                     ),
                   ),
                 ],
               ),
-              
+
               // Payment Status (if available)
-              if (student.paymentStatus != null) ...[
-                const SizedBox(height: 12),
-                _buildPaymentStatusRow(),
-              ],
+              // if (student.paymentStatus != null) ...[
+              //   // const SizedBox(height: 12),
+              //   // _buildPaymentStatusRow(),
+              // ],
             ],
           ),
         ),
@@ -248,82 +250,82 @@ class StudentListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentStatusRow() {
-    if (student.paymentStatus == null) return const SizedBox.shrink();
+  // Widget _buildPaymentStatusRow() {
+  //   if (student.paymentStatus == null) return const SizedBox.shrink();
 
-    Color statusColor;
-    IconData statusIcon;
-    String statusText = student.paymentStatus!;
+  //   Color statusColor;
+  //   IconData statusIcon;
+  //   String statusText = student.paymentStatus!;
 
-    switch (student.paymentStatus!.toUpperCase()) {
-      case 'PAID':
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle_outline;
-        break;
-      case 'PARTIAL':
-        statusColor = Colors.orange;
-        statusIcon = Icons.schedule_outlined;
-        break;
-      case 'UNPAID':
-        statusColor = Colors.red;
-        statusIcon = Icons.warning_amber_outlined;
-        break;
-      default:
-        statusColor = Colors.grey;
-        statusIcon = Icons.help_outline;
-    }
+  //   switch (student.paymentStatus!.toUpperCase()) {
+  //     case 'PAID':
+  //       statusColor = Colors.green;
+  //       statusIcon = Icons.check_circle_outline;
+  //       break;
+  //     case 'PARTIAL':
+  //       statusColor = Colors.orange;
+  //       statusIcon = Icons.schedule_outlined;
+  //       break;
+  //     case 'UNPAID':
+  //       statusColor = Colors.red;
+  //       statusIcon = Icons.warning_amber_outlined;
+  //       break;
+  //     default:
+  //       statusColor = Colors.grey;
+  //       statusIcon = Icons.help_outline;
+  //   }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(statusIcon, color: statusColor, size: 16),
-          const SizedBox(width: 8),
-          Text(
-            'Payment Status: $statusText',
-            style: TextStyle(
-              fontSize: 13,
-              color: statusColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          if (student.totalPaidInMonth != null) ...[
-            const Spacer(),
-            Text(
-              'Paid: \$${student.totalPaidInMonth!.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-          if (student.remainingAmount != null && student.remainingAmount! > 0) ...[
-            const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                'Due: \$${student.remainingAmount!.toStringAsFixed(2)}',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.red[700],
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+  //   return Container(
+  //     width: double.infinity,
+  //     padding: const EdgeInsets.all(12),
+  //     decoration: BoxDecoration(
+  //       color: statusColor.withOpacity(0.1),
+  //       borderRadius: BorderRadius.circular(8),
+  //       border: Border.all(color: statusColor.withOpacity(0.3)),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Icon(statusIcon, color: statusColor, size: 16),
+  //         const SizedBox(width: 8),
+  //         Text(
+  //           'Payment Status: $statusText',
+  //           style: TextStyle(
+  //             fontSize: 13,
+  //             color: statusColor,
+  //             fontWeight: FontWeight.w600,
+  //           ),
+  //         ),
+  //         if (student.totalPaidInMonth != null) ...[
+  //           const Spacer(),
+  //           Text(
+  //             'Paid: \$${student.totalPaidInMonth!.toStringAsFixed(2)}',
+  //             style: const TextStyle(
+  //               fontSize: 12,
+  //               fontWeight: FontWeight.w500,
+  //               color: Colors.black87,
+  //             ),
+  //           ),
+  //         ],
+  //         if (student.remainingAmount != null && student.remainingAmount! > 0) ...[
+  //           const SizedBox(width: 12),
+  //           Container(
+  //             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+  //             decoration: BoxDecoration(
+  //               color: Colors.red.withOpacity(0.1),
+  //               borderRadius: BorderRadius.circular(4),
+  //             ),
+  //             child: Text(
+  //               'Due: \$${student.remainingAmount!.toStringAsFixed(2)}',
+  //               style: TextStyle(
+  //                 fontSize: 11,
+  //                 color: Colors.red[700],
+  //                 fontWeight: FontWeight.w600,
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ],
+  //     ),
+  //   );
+  // }
 }

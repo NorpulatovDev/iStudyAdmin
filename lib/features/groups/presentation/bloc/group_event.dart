@@ -1,3 +1,5 @@
+// lib/features/groups/presentation/bloc/group_event.dart - Complete working version
+
 part of 'group_bloc.dart';
 
 sealed class GroupEvent extends Equatable {
@@ -122,6 +124,19 @@ class GroupRemoveStudentRequested extends GroupEvent {
   final int studentId;
 
   const GroupRemoveStudentRequested({
+    required this.groupId,
+    required this.studentId,
+  });
+
+  @override
+  List<Object> get props => [groupId, studentId];
+}
+
+class GroupAddStudentRequested extends GroupEvent {
+  final int groupId;
+  final int studentId;
+
+  const GroupAddStudentRequested({
     required this.groupId,
     required this.studentId,
   });

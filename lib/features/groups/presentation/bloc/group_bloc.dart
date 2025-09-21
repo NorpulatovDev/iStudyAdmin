@@ -24,6 +24,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     on<GroupDeleteRequested>(_onDeleteRequested);
     on<GroupRefreshRequested>(_onRefreshRequested);
     on<GroupRemoveStudentRequested>(_onRemoveStudentRequested);
+    on<GroupAddStudentRequested>(_onAddStudentRequested); // New event
   }
 
   Future<void> _onLoadByBranch(
@@ -79,10 +80,7 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
 
     try {
       final group = await _groupRepository.getGroupById(
-        event.groupId, 
-        event.year, 
-        event.month
-      );
+          event.groupId, event.year, event.month);
       emit(GroupDetailLoaded(group));
     } catch (e) {
       emit(GroupError(e.toString()));
@@ -201,7 +199,37 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
         event.studentId,
       );
 
-      emit(const GroupOperationSuccess('Student removed from group successfully'));
+      emit(const GroupOperationSuccess(
+          'Student removed from group successfully'));
+
+      // Refresh the group details to show updated student list
+      if (state is GroupDetailLoaded) {
+        final currentGroup = (state as GroupDetailLoaded).group;
+        final updatedGroup = await _groupRepository.getGroupById(
+          currentGroup.id,
+          DateTime.now().year,
+          DateTime.now().month,
+        );
+        emit(GroupDetailLoaded(updatedGroup));
+      }
+    } catch (e) {
+      emit(GroupError(e.toString()));
+    }
+  }
+
+  Future<void> _onAddStudentRequested(
+    GroupAddStudentRequested event,
+    Emitter<GroupState> emit,
+  ) async {
+    emit(GroupOperationLoading());
+
+    try {
+      await _groupRepository.addStudentsToGroup(
+        event.groupId,
+        event.studentId,
+      );
+
+      emit(const GroupOperationSuccess('Student added to group successfully'));
       
       // Refresh the group details to show updated student list
       if (state is GroupDetailLoaded) {
