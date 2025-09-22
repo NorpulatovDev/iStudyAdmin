@@ -19,7 +19,9 @@ class _CoursesPageState extends State<CoursesPage> {
   @override
   void initState() {
     super.initState();
-    context.read<CourseBloc>().add(CourseLoadRequested(branchId: widget.branchId));
+    context
+        .read<CourseBloc>()
+        .add(CourseLoadRequested(branchId: widget.branchId));
   }
 
   @override
@@ -55,19 +57,19 @@ class _CoursesPageState extends State<CoursesPage> {
                   if (state is CourseLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  
+
                   if (state is CourseLoaded) {
                     if (state.courses.isEmpty) {
                       return _buildEmptyState();
                     }
-                    
+
                     return _buildCoursesList(state.courses);
                   }
-                  
+
                   if (state is CourseError) {
                     return _buildErrorState(state.message);
                   }
-                  
+
                   return const Center(
                     child: Text(
                       'No courses available',
@@ -126,7 +128,8 @@ class _CoursesPageState extends State<CoursesPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -295,7 +298,7 @@ class _CoursesPageState extends State<CoursesPage> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '\$${course.price.toStringAsFixed(2)}',
+                            '${course.price.toStringAsFixed(1)} UZS',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green[800],
@@ -516,13 +519,17 @@ class _CoursesPageState extends State<CoursesPage> {
         builder: (context) => CourseDetailsPage(courseId: course.id),
       ),
     );
-    
+
     // Refresh courses when returning from course details
-    context.read<CourseBloc>().add(CourseLoadRequested(branchId: widget.branchId));
+    context
+        .read<CourseBloc>()
+        .add(CourseLoadRequested(branchId: widget.branchId));
   }
 
   void _refreshCourses() {
-    context.read<CourseBloc>().add(CourseRefreshRequested(branchId: widget.branchId));
+    context
+        .read<CourseBloc>()
+        .add(CourseRefreshRequested(branchId: widget.branchId));
   }
 
   void _showCreateCourseDialog() {
@@ -531,7 +538,8 @@ class _CoursesPageState extends State<CoursesPage> {
       builder: (dialogContext) => BlocProvider.value(
         value: context.read<CourseBloc>(),
         child: CourseFormDialog(
-          branchId: widget.branchId ?? 1, // fallback to 1 if no branch ID available
+          branchId:
+              widget.branchId ?? 1, // fallback to 1 if no branch ID available
         ),
       ),
     );

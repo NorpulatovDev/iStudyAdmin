@@ -107,7 +107,8 @@ class StudentInfoTable extends StatelessWidget {
     );
   }
 
-  DataRow _buildDataRow(BuildContext context, StudentInfo student, int ordinal) {
+  DataRow _buildDataRow(
+      BuildContext context, StudentInfo student, int ordinal) {
     Color? rowColor;
 
     switch (student.paymentStatus?.toLowerCase()) {
@@ -135,12 +136,12 @@ class StudentInfoTable extends StatelessWidget {
         DataCell(Text(student.phoneNumber ?? 'N/A')),
         DataCell(Text(student.parentPhoneNumber ?? 'N/A')),
         DataCell(Text(student.coursePrice != null
-            ? '\$${student.coursePrice!.toStringAsFixed(2)}'
+            ? student.coursePrice!.toStringAsFixed(1)
             : 'N/A')),
         DataCell(Text(
           student.totalPaidInMonth != null
-              ? '\$${student.totalPaidInMonth!.toStringAsFixed(2)}'
-              : '\$0.00',
+              ? student.totalPaidInMonth!.toStringAsFixed(1)
+              : '0.00 UZS',
           style: TextStyle(
             color: (student.totalPaidInMonth ?? 0) > 0
                 ? Colors.green[700]
@@ -150,7 +151,7 @@ class StudentInfoTable extends StatelessWidget {
         )),
         DataCell(Text(
           student.remainingAmount != null
-              ? '\$${student.remainingAmount!.toStringAsFixed(2)}'
+              ? student.remainingAmount!.toStringAsFixed(1)
               : 'N/A',
           style: TextStyle(
             color: (student.remainingAmount ?? 0) > 0
@@ -239,14 +240,18 @@ class StudentInfoTable extends StatelessWidget {
   void _viewStudent(BuildContext context, StudentInfo student) {
     // TODO: Implement view student functionality
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('View student: ${student.studentName} - To be implemented')),
+      SnackBar(
+          content:
+              Text('View student: ${student.studentName} - To be implemented')),
     );
   }
 
   void _editStudent(BuildContext context, StudentInfo student) {
     // TODO: Implement edit student functionality
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit student: ${student.studentName} - To be implemented')),
+      SnackBar(
+          content:
+              Text('Edit student: ${student.studentName} - To be implemented')),
     );
   }
 
@@ -276,14 +281,14 @@ class StudentInfoTable extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              
+
               // Dispatch remove student event
               context.read<GroupBloc>().add(
-                GroupRemoveStudentRequested(
-                  groupId: groupId,
-                  studentId: student.studentId!,
-                ),
-              );
+                    GroupRemoveStudentRequested(
+                      groupId: groupId,
+                      studentId: student.studentId!,
+                    ),
+                  );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Remove'),

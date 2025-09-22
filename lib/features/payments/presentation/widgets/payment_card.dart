@@ -39,9 +39,9 @@ class PaymentCard extends StatelessWidget {
                 size: 24,
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // Payment details
             Expanded(
               child: Column(
@@ -60,7 +60,7 @@ class PaymentCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '\$${NumberFormat('#,##0.00').format(payment.amount)}',
+                        NumberFormat('#,##0.0').format(payment.amount),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -69,9 +69,7 @@ class PaymentCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
                   const SizedBox(height: 8),
-                  
                   Row(
                     children: [
                       Icon(
@@ -91,7 +89,8 @@ class PaymentCard extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: _getStatusColor().withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -107,9 +106,7 @@ class PaymentCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
                   const SizedBox(height: 8),
-                  
                   if (payment.groupName != null) ...[
                     Row(
                       children: [
@@ -130,8 +127,8 @@ class PaymentCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  
-                  if (payment.description != null && payment.description!.isNotEmpty) ...[
+                  if (payment.description != null &&
+                      payment.description!.isNotEmpty) ...[
                     Row(
                       children: [
                         Icon(
@@ -156,7 +153,6 @@ class PaymentCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  
                   Row(
                     children: [
                       Icon(
@@ -166,7 +162,8 @@ class PaymentCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        DateFormat('MMM dd, yyyy HH:mm').format(payment.createdAt),
+                        DateFormat('MMM dd, yyyy HH:mm')
+                            .format(payment.createdAt.toLocal()),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[500],
@@ -193,7 +190,7 @@ class PaymentCard extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Action buttons
             if (onEdit != null || onDelete != null)
               PopupMenuButton<String>(

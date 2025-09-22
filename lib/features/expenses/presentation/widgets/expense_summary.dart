@@ -39,16 +39,20 @@ class ExpenseSummaryWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, List<ExpenseModel> expenses, double? total) {
-    final displayTotal = total ?? expenses.fold<double>(0, (sum, expense) => sum + expense.amount);
-    
+  Widget _buildSummaryCard(
+      BuildContext context, List<ExpenseModel> expenses, double? total) {
+    final displayTotal = total ??
+        expenses.fold<double>(0, (sum, expense) => sum + expense.amount);
+
     // Calculate category breakdown
     final categoryTotals = <String, double>{};
     for (final expense in expenses) {
-      final category = ExpenseCategoryExtension.fromString(expense.category).displayName;
-      categoryTotals[category] = (categoryTotals[category] ?? 0) + expense.amount;
+      final category =
+          ExpenseCategoryExtension.fromString(expense.category).displayName;
+      categoryTotals[category] =
+          (categoryTotals[category] ?? 0) + expense.amount;
     }
-    
+
     final topCategory = categoryTotals.isNotEmpty
         ? categoryTotals.entries.reduce((a, b) => a.value > b.value ? a : b)
         : null;
@@ -108,21 +112,21 @@ class ExpenseSummaryWidget extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Total amount
           Text(
-            '\$${NumberFormat('#,##0.00').format(displayTotal)}',
+            NumberFormat('#,##0.0').format(displayTotal),
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.red,
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Stats row
           Row(
             children: [
@@ -142,9 +146,9 @@ class ExpenseSummaryWidget extends StatelessWidget {
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Quick actions
           Row(
             children: [
@@ -182,7 +186,8 @@ class ExpenseSummaryWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String value, String label, IconData icon, Color color) {
+  Widget _buildStatItem(
+      String value, String label, IconData icon, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -386,7 +391,7 @@ class ExpenseSummaryWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '\$0.00',
+            '0.00',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -400,12 +405,12 @@ class ExpenseSummaryWidget extends StatelessWidget {
 
   String _getPeriodText() {
     if (date == null) return 'All time';
-    
+
     switch (period) {
       case 'monthly':
-        return DateFormat('MMMM yyyy').format(date!);
+        return DateFormat('MMMM yyyy').format(date!.toLocal());
       case 'daily':
-        return DateFormat('MMM dd, yyyy').format(date!);
+        return DateFormat('MMM dd, yyyy').format(date!.toLocal());
       default:
         return 'All time';
     }
@@ -448,9 +453,9 @@ class ExpenseSummaryWidget extends StatelessWidget {
       switch (period) {
         case 'monthly':
           context.read<ExpenseBloc>().add(LoadMonthlyExpenses(
-            year: date!.year,
-            month: date!.month,
-          ));
+                year: date!.year,
+                month: date!.month,
+              ));
           break;
         case 'daily':
           context.read<ExpenseBloc>().add(LoadDailyExpenses(date: date!));

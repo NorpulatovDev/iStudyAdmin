@@ -30,8 +30,8 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
   void _loadTeacherDetails() {
     // Load teacher groups using GroupBloc
     context.read<GroupBloc>().add(
-      GroupLoadByTeacherRequested(teacherId: widget.teacherId),
-    );
+          GroupLoadByTeacherRequested(teacherId: widget.teacherId),
+        );
   }
 
   @override
@@ -398,7 +398,7 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
     return BlocBuilder<GroupBloc, GroupState>(
       builder: (context, groupState) {
         final teacherGroups = _getTeacherGroupsFromState(groupState);
-        
+
         return Row(
           children: [
             Expanded(
@@ -546,7 +546,7 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
               Expanded(
                 child: _buildSalaryDetailCard(
                   'Base Salary',
-                  '\$${NumberFormat('#,##0.00').format(teacher.baseSalary)}',
+                  NumberFormat('#,##0.00').format(teacher.baseSalary),
                   Icons.money,
                   Colors.green,
                 ),
@@ -567,7 +567,8 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
     );
   }
 
-  Widget _buildSalaryDetailCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSalaryDetailCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -641,7 +642,7 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
             child: BlocBuilder<GroupBloc, GroupState>(
               builder: (context, groupState) {
                 final teacherGroups = _getTeacherGroupsFromState(groupState);
-                
+
                 return Row(
                   children: [
                     Container(
@@ -828,7 +829,8 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.school, size: 14, color: Colors.grey[600]),
+                            Icon(Icons.school,
+                                size: 14, color: Colors.grey[600]),
                             const SizedBox(width: 4),
                             Text(
                               group.courseName,
@@ -838,7 +840,8 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Icon(Icons.people, size: 14, color: Colors.grey[600]),
+                            Icon(Icons.people,
+                                size: 14, color: Colors.grey[600]),
                             const SizedBox(width: 4),
                             Text(
                               '${group.studentCount} students',
@@ -1021,7 +1024,9 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.read<TeacherBloc>().add(TeacherDeleteRequested(teacher.id));
+              context
+                  .read<TeacherBloc>()
+                  .add(TeacherDeleteRequested(teacher.id));
               Navigator.pop(context); // Go back to teachers list after deletion
             },
             style: ElevatedButton.styleFrom(

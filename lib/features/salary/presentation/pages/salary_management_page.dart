@@ -19,7 +19,7 @@ class SalaryPage extends StatefulWidget {
 
 class _SalaryPageState extends State<SalaryPage> {
   DateTime _selectedDate = DateTime.now();
-  
+
   @override
   void initState() {
     super.initState();
@@ -29,17 +29,17 @@ class _SalaryPageState extends State<SalaryPage> {
   void _loadData() {
     // Load teachers for branch
     context.read<TeacherBloc>().add(
-      TeacherLoadByBranchRequested(branchId: widget.branchId),
-    );
-    
+          TeacherLoadByBranchRequested(branchId: widget.branchId),
+        );
+
     // Load salary calculations for current month
     context.read<TeacherSalaryBloc>().add(
-      SalaryCalculateForBranchRequested(
-        year: _selectedDate.year,
-        month: _selectedDate.month,
-        branchId: widget.branchId,
-      ),
-    );
+          SalaryCalculateForBranchRequested(
+            year: _selectedDate.year,
+            month: _selectedDate.month,
+            branchId: widget.branchId,
+          ),
+        );
   }
 
   @override
@@ -144,7 +144,8 @@ class _SalaryPageState extends State<SalaryPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -253,18 +254,18 @@ class _SalaryPageState extends State<SalaryPage> {
               if (state is TeacherLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
-              
+
               if (state is TeacherLoaded) {
                 if (state.teachers.isEmpty) {
                   return _buildEmptyTeachersState();
                 }
                 return _buildTeachersListView(state.teachers);
               }
-              
+
               if (state is TeacherError) {
                 return _buildErrorState(state.message);
               }
-              
+
               return const Center(
                 child: Text('No teachers data available'),
               );
@@ -308,7 +309,7 @@ class _SalaryPageState extends State<SalaryPage> {
               children: [
                 const SizedBox(height: 4),
                 Text(
-                  teacher.salaryTypeDisplayName,
+                  "${teacher.salaryTypeDisplayName}: ${teacher.paymentPercentage}%",
                   style: TextStyle(
                     color: _getSalaryTypeColor(teacher.salaryType),
                     fontSize: 12,
@@ -317,7 +318,7 @@ class _SalaryPageState extends State<SalaryPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Base: \$${NumberFormat('#,##0').format(teacher.baseSalary)}',
+                  'Base: ${NumberFormat('#,##0').format(teacher.baseSalary)}',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -345,15 +346,15 @@ class _SalaryPageState extends State<SalaryPage> {
           if (state is TeacherSalaryLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          
+
           if (state is TeacherSalaryCalculationsLoaded) {
             return _buildSalaryOverview(state.salaryCalculations);
           }
-          
+
           if (state is TeacherSalaryError) {
             return _buildErrorState(state.message);
           }
-          
+
           return _buildWelcomeState();
         },
       ),
@@ -362,15 +363,15 @@ class _SalaryPageState extends State<SalaryPage> {
 
   Widget _buildSalaryOverview(List<SalaryCalculationModel> calculations) {
     final totalSalary = calculations.fold<double>(
-      0.0, 
+      0.0,
       (sum, calc) => sum + calc.totalSalary,
     );
     final totalPaid = calculations.fold<double>(
-      0.0, 
+      0.0,
       (sum, calc) => sum + calc.alreadyPaid,
     );
     final totalRemaining = calculations.fold<double>(
-      0.0, 
+      0.0,
       (sum, calc) => sum + calc.remainingAmount,
     );
 
@@ -386,14 +387,14 @@ class _SalaryPageState extends State<SalaryPage> {
           ),
         ),
         const SizedBox(height: 24),
-        
+
         // Summary Cards
         Row(
           children: [
             Expanded(
               child: _buildSummaryCard(
                 'Total Salary',
-                '\$${NumberFormat('#,##0.00').format(totalSalary)}',
+                '${NumberFormat('#,##0.0').format(totalSalary)} UZS',
                 Icons.attach_money,
                 Colors.blue,
               ),
@@ -402,7 +403,7 @@ class _SalaryPageState extends State<SalaryPage> {
             Expanded(
               child: _buildSummaryCard(
                 'Total Paid',
-                '\$${NumberFormat('#,##0.00').format(totalPaid)}',
+                '${NumberFormat('#,##0.0').format(totalPaid)} UZS',
                 Icons.payment,
                 Colors.green,
               ),
@@ -411,7 +412,7 @@ class _SalaryPageState extends State<SalaryPage> {
             Expanded(
               child: _buildSummaryCard(
                 'Remaining',
-                '\$${NumberFormat('#,##0.00').format(totalRemaining)}',
+                '${NumberFormat('#,##0.0').format(totalRemaining)} UZS',
                 Icons.pending_actions,
                 Colors.orange,
               ),
@@ -427,9 +428,9 @@ class _SalaryPageState extends State<SalaryPage> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         // Salary Calculations Table
         Text(
           'Teacher Salary Details',
@@ -440,7 +441,7 @@ class _SalaryPageState extends State<SalaryPage> {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         Expanded(
           child: Container(
             decoration: BoxDecoration(
@@ -463,7 +464,8 @@ class _SalaryPageState extends State<SalaryPage> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -550,17 +552,19 @@ class _SalaryPageState extends State<SalaryPage> {
                   ],
                 ),
               ),
-              DataCell(Text('\$${NumberFormat('#,##0.00').format(calc.baseSalary)}')),
-              DataCell(Text('\$${NumberFormat('#,##0.00').format(calc.paymentBasedSalary)}')),
+              DataCell(Text(NumberFormat('#,##0.0').format(calc.baseSalary))),
+              DataCell(Text(
+                NumberFormat('#,##0.0').format(calc.paymentBasedSalary),
+              )),
               DataCell(
                 Text(
-                  '\$${NumberFormat('#,##0.00').format(calc.totalSalary)}',
+                  NumberFormat('#,##0.00').format(calc.totalSalary),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               DataCell(
                 Text(
-                  '\$${NumberFormat('#,##0.00').format(calc.alreadyPaid)}',
+                  NumberFormat('#,##0.0').format(calc.alreadyPaid),
                   style: TextStyle(
                     color: calc.alreadyPaid > 0 ? Colors.green : Colors.grey,
                   ),
@@ -568,9 +572,10 @@ class _SalaryPageState extends State<SalaryPage> {
               ),
               DataCell(
                 Text(
-                  '\$${NumberFormat('#,##0.00').format(calc.remainingAmount)}',
+                  NumberFormat('#,##0.0').format(calc.remainingAmount),
                   style: TextStyle(
-                    color: calc.remainingAmount > 0 ? Colors.orange : Colors.green,
+                    color:
+                        calc.remainingAmount > 0 ? Colors.orange : Colors.green,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -580,7 +585,8 @@ class _SalaryPageState extends State<SalaryPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      onPressed: () => _navigateToSalaryCalculationWithModel(calc),
+                      onPressed: () =>
+                          _navigateToSalaryCalculationWithModel(calc),
                       icon: const Icon(Icons.visibility, size: 18),
                       tooltip: 'View Details',
                     ),
@@ -831,15 +837,15 @@ class _SalaryPageState extends State<SalaryPage> {
       setState(() {
         _selectedDate = picked;
       });
-      
+
       // Reload salary calculations for new date
       context.read<TeacherSalaryBloc>().add(
-        SalaryCalculateForBranchRequested(
-          year: _selectedDate.year,
-          month: _selectedDate.month,
-          branchId: widget.branchId,
-        ),
-      );
+            SalaryCalculateForBranchRequested(
+              year: _selectedDate.year,
+              month: _selectedDate.month,
+              branchId: widget.branchId,
+            ),
+          );
     }
   }
 
@@ -928,7 +934,8 @@ class _SalaryPageState extends State<SalaryPage> {
                   prefixIcon: Icon(Icons.attach_money),
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -957,7 +964,7 @@ class _SalaryPageState extends State<SalaryPage> {
             },
             builder: (context, state) {
               final isLoading = state is TeacherSalaryOperationLoading;
-              
+
               return ElevatedButton(
                 onPressed: isLoading
                     ? null
@@ -965,17 +972,19 @@ class _SalaryPageState extends State<SalaryPage> {
                         final amount = double.tryParse(amountController.text);
                         if (amount != null && amount > 0) {
                           context.read<TeacherSalaryBloc>().add(
-                            SalaryPaymentCreateRequested(
-                              teacherId: calc.teacherId,
-                              year: calc.year,
-                              month: calc.month,
-                              amount: amount,
-                              description: descriptionController.text.trim().isNotEmpty
-                                  ? descriptionController.text.trim()
-                                  : null,
-                              branchId: calc.branchId,
-                            ),
-                          );
+                                SalaryPaymentCreateRequested(
+                                  teacherId: calc.teacherId,
+                                  year: calc.year,
+                                  month: calc.month,
+                                  amount: amount,
+                                  description: descriptionController.text
+                                          .trim()
+                                          .isNotEmpty
+                                      ? descriptionController.text.trim()
+                                      : null,
+                                  branchId: calc.branchId,
+                                ),
+                              );
                         }
                       },
                 child: isLoading

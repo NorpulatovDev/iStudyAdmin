@@ -129,7 +129,7 @@ class _StudentsPageState extends State<StudentsPage> {
                       // Search Bar
                       StudentSearchBar(
                         controller: _searchController,
-                        onChanged: _onSearchChanged,
+                        onChanged:  _onSearchChanged,
                         enabled: _currentBranchId != null,
                       ),
                       

@@ -37,9 +37,9 @@ class UnpaidStudentCard extends StatelessWidget {
                 size: 24,
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // Student details
             Expanded(
               child: Column(
@@ -58,7 +58,7 @@ class UnpaidStudentCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '\$${NumberFormat('#,##0.00').format(student.remainingAmount)}',
+                        NumberFormat('#,##0.0').format(student.remainingAmount),
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -67,9 +67,9 @@ class UnpaidStudentCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Row(
                     children: [
                       Icon(
@@ -89,7 +89,8 @@ class UnpaidStudentCard extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -105,11 +106,12 @@ class UnpaidStudentCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Contact information
-                  if (student.phoneNumber != null || student.parentPhoneNumber != null) ...[
+                  if (student.phoneNumber != null ||
+                      student.parentPhoneNumber != null) ...[
                     Row(
                       children: [
                         Icon(
@@ -149,7 +151,7 @@ class UnpaidStudentCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  
+
                   // Quick action buttons
                   Row(
                     children: [
@@ -161,21 +163,23 @@ class UnpaidStudentCard extends StatelessWidget {
                           color: Colors.blue,
                           onPressed: () => _makePhoneCall(student.phoneNumber!),
                         ),
-                      
-                      if (student.phoneNumber != null && student.parentPhoneNumber != null)
+
+                      if (student.phoneNumber != null &&
+                          student.parentPhoneNumber != null)
                         const SizedBox(width: 8),
-                      
+
                       // Call parent button
                       if (student.parentPhoneNumber != null)
                         _buildQuickActionButton(
                           icon: Icons.phone,
                           label: 'Call Parent',
                           color: Colors.green,
-                          onPressed: () => _makePhoneCall(student.parentPhoneNumber!),
+                          onPressed: () =>
+                              _makePhoneCall(student.parentPhoneNumber!),
                         ),
-                      
+
                       const Spacer(),
-                      
+
                       // Make payment button
                       if (onMakePayment != null)
                         ElevatedButton.icon(
@@ -185,7 +189,8 @@ class UnpaidStudentCard extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),

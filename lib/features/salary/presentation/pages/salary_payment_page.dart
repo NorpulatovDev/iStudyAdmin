@@ -22,8 +22,8 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
 
   void _loadPayments() {
     context.read<TeacherSalaryBloc>().add(
-      SalaryPaymentsByBranchRequested(branchId: widget.branchId),
-    );
+          SalaryPaymentsByBranchRequested(branchId: widget.branchId),
+        );
   }
 
   @override
@@ -138,7 +138,8 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -158,7 +159,8 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
     // Group payments by month for better organization
     final groupedPayments = <String, List<TeacherSalaryPaymentModel>>{};
     for (final payment in payments) {
-      final key = DateFormat('MMMM yyyy').format(DateTime(payment.year, payment.month));
+      final key =
+          DateFormat('MMMM yyyy').format(DateTime(payment.year, payment.month));
       groupedPayments.putIfAbsent(key, () => []).add(payment);
     }
 
@@ -177,7 +179,6 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
         children: [
           _buildSummaryCards(payments),
           const SizedBox(height: 32),
-          
           Text(
             'Payment History',
             style: TextStyle(
@@ -187,7 +188,6 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
             ),
           ),
           const SizedBox(height: 16),
-          
           ...sortedKeys.map((monthYear) {
             final monthPayments = groupedPayments[monthYear]!;
             return _buildMonthSection(monthYear, monthPayments);
@@ -198,13 +198,15 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
   }
 
   Widget _buildSummaryCards(List<TeacherSalaryPaymentModel> payments) {
-    final totalAmount = payments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
+    final totalAmount =
+        payments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
     final thisMonthPayments = payments.where((payment) {
       final now = DateTime.now();
       return payment.year == now.year && payment.month == now.month;
     }).toList();
-    final thisMonthAmount = thisMonthPayments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
-    
+    final thisMonthAmount = thisMonthPayments.fold<double>(
+        0.0, (sum, payment) => sum + payment.amount);
+
     // Get unique teachers count
     final uniqueTeachers = payments.map((p) => p.teacherId).toSet().length;
 
@@ -213,7 +215,7 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
         Expanded(
           child: _buildSummaryCard(
             'Total Payments',
-            '\$${NumberFormat('#,##0.00').format(totalAmount)}',
+            NumberFormat('#,##0.0').format(totalAmount),
             Icons.attach_money,
             Colors.green,
           ),
@@ -222,7 +224,7 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
         Expanded(
           child: _buildSummaryCard(
             'This Month',
-            '\$${NumberFormat('#,##0.00').format(thisMonthAmount)}',
+            NumberFormat('#,##0.0').format(thisMonthAmount),
             Icons.calendar_month,
             Colors.blue,
           ),
@@ -249,7 +251,8 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -302,9 +305,11 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
     );
   }
 
-  Widget _buildMonthSection(String monthYear, List<TeacherSalaryPaymentModel> payments) {
-    final totalAmount = payments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
-    
+  Widget _buildMonthSection(
+      String monthYear, List<TeacherSalaryPaymentModel> payments) {
+    final totalAmount =
+        payments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
@@ -365,7 +370,7 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${payments.length} payments • ${NumberFormat('#,##0.00').format(totalAmount)}',
+                        '${payments.length} payments • ${NumberFormat('#,##0.0').format(totalAmount)}',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -436,7 +441,8 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
               Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
-                DateFormat('MMM dd, yyyy HH:mm').format(payment.createdAt),
+                DateFormat('MMM dd, yyyy HH:mm').format(
+                    payment.createdAt.add(const Duration(hours: 5)).toLocal()),
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 14,
@@ -470,7 +476,7 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            NumberFormat('#,##0.00').format(payment.amount),
+            NumberFormat('#,##0.0').format(payment.amount),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -661,9 +667,9 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Are you sure you want to delete this payment?',
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
             Container(
@@ -686,9 +692,12 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
                   ),
                   const SizedBox(height: 8),
                   Text('Teacher: ${payment.teacherName}'),
-                  Text('Amount: ${NumberFormat('#,##0.00').format(payment.amount)}'),
-                  Text('Period: ${DateFormat('MMMM yyyy').format(DateTime(payment.year, payment.month))}'),
-                  Text('Date: ${DateFormat('MMM dd, yyyy').format(payment.createdAt)}'),
+                  Text(
+                      'Amount: ${NumberFormat('#,##0.0').format(payment.amount)}'),
+                  Text(
+                      'Period: ${DateFormat('MMMM yyyy').format(DateTime(payment.year, payment.month))}'),
+                  Text(
+                      'Date: ${DateFormat('MMM dd, yyyy').format(payment.createdAt.toLocal())}'),
                   if (payment.description != null)
                     Text('Description: ${payment.description}'),
                 ],
@@ -730,14 +739,15 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
             },
             builder: (context, state) {
               final isLoading = state is TeacherSalaryOperationLoading;
-              
+
               return ElevatedButton(
                 onPressed: isLoading
                     ? null
                     : () {
                         context.read<TeacherSalaryBloc>().add(
-                          SalaryPaymentDeleteRequested(paymentId: payment.id),
-                        );
+                              SalaryPaymentDeleteRequested(
+                                  paymentId: payment.id),
+                            );
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
@@ -752,7 +762,8 @@ class _SalaryPaymentPageState extends State<SalaryPaymentPage> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text('Delete'),

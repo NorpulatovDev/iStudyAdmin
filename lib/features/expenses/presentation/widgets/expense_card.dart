@@ -17,7 +17,7 @@ class ExpenseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final category = ExpenseCategoryExtension.fromString(expense.category);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -35,9 +35,9 @@ class ExpenseCard extends StatelessWidget {
               size: 24,
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Expense details
           Expanded(
             child: Column(
@@ -46,7 +46,7 @@ class ExpenseCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '\$${NumberFormat('#,##0.00').format(expense.amount)}',
+                      NumberFormat('#,##0.0').format(expense.amount),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -55,7 +55,8 @@ class ExpenseCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: _getCategoryColor(category).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -71,9 +72,7 @@ class ExpenseCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
                 const SizedBox(height: 4),
-                
                 if (expense.description != null) ...[
                   Text(
                     expense.description!,
@@ -86,7 +85,6 @@ class ExpenseCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                 ],
-                
                 Row(
                   children: [
                     Icon(
@@ -96,7 +94,8 @@ class ExpenseCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      DateFormat('MMM dd, yyyy HH:mm').format(expense.createdAt),
+                      DateFormat('MMM dd, yyyy HH:mm')
+                          .format(expense.createdAt),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
@@ -121,7 +120,7 @@ class ExpenseCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Action buttons
           if (onEdit != null || onDelete != null)
             PopupMenuButton<String>(

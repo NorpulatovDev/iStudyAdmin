@@ -76,25 +76,17 @@ class StudentRepository {
   // Search students
   Future<List<StudentModel>> searchStudents({
     required int branchId,
-    String? firstName,
-    String? lastName,
-    String? phoneNumber,
+    String? name,
   }) async {
     try {
       final queryParams = <String, dynamic>{
         'branchId': branchId,
       };
 
-      if (firstName != null && firstName.trim().isNotEmpty) {
-        queryParams['firstName'] = firstName.trim();
+      if (name != null && name.trim().isNotEmpty) {
+        queryParams['name'] = name.trim();
       }
-      if (lastName != null && lastName.trim().isNotEmpty) {
-        queryParams['lastName'] = lastName.trim();
-      }
-      if (phoneNumber != null && phoneNumber.trim().isNotEmpty) {
-        queryParams['phoneNumber'] = phoneNumber.trim();
-      }
-
+      
       final response = await _apiService.dio.get(
         '${ApiConstants.studentsEndpoint}/search',
         queryParameters: queryParams,
@@ -131,9 +123,8 @@ class StudentRepository {
     }
   }
 
-  Future<StudentModel> createStudent({
-    required CreateStudentRequest request
-  }) async {
+  Future<StudentModel> createStudent(
+      {required CreateStudentRequest request}) async {
     try {
       final data = request.toJson();
 
@@ -161,10 +152,8 @@ class StudentRepository {
     }
   }
 
-  Future<StudentModel> updateStudent({
-    required int id,
-    required CreateStudentRequest request
-  }) async {
+  Future<StudentModel> updateStudent(
+      {required int id, required CreateStudentRequest request}) async {
     try {
       final data = request.toJson();
 

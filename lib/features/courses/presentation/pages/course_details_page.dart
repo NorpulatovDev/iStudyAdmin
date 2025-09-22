@@ -243,7 +243,7 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
               _buildInfoChip(
                 icon: Icons.attach_money_outlined,
                 label: 'Price',
-                value: '\$${course.price.toStringAsFixed(2)}',
+                value: course.price.toStringAsFixed(1),
                 color: Colors.green,
               ),
               if (course.durationMonths != null)
@@ -361,7 +361,9 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
             icon: Icons.trending_up_outlined,
             title: 'Active Status',
             value: course.groups?.isNotEmpty == true ? 'Active' : 'Inactive',
-            color: course.groups?.isNotEmpty == true ? Colors.green : Colors.orange,
+            color: course.groups?.isNotEmpty == true
+                ? Colors.green
+                : Colors.orange,
           ),
         ),
       ],
@@ -667,7 +669,8 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                           ),
                           if (group.teacherName != null) ...[
                             const SizedBox(width: 12),
-                            Icon(Icons.person, size: 14, color: Colors.grey[600]),
+                            Icon(Icons.person,
+                                size: 14, color: Colors.grey[600]),
                             const SizedBox(width: 4),
                             Text(
                               group.teacherName!,

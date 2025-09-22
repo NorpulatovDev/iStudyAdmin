@@ -68,9 +68,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     try {
       final students = await _studentRepository.searchStudents(
         branchId: event.branchId,
-        firstName: event.query,
-        lastName: event.query,
-        phoneNumber: event.query,
+        name: event.query,
       );
       emit(StudentLoaded(students, isSearchResult: true));
     } catch (e) {

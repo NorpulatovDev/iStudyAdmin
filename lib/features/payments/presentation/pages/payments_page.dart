@@ -16,7 +16,8 @@ class PaymentsPage extends StatefulWidget {
   State<PaymentsPage> createState() => _PaymentsPageState();
 }
 
-class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMixin {
+class _PaymentsPageState extends State<PaymentsPage>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
@@ -41,9 +42,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
     context.read<PaymentBloc>().add(LoadRecentPayments());
     // Load unpaid students for current month
     context.read<PaymentBloc>().add(LoadUnpaidStudents(
-      year: _selectedDate.year,
-      month: _selectedDate.month,
-    ));
+          year: _selectedDate.year,
+          month: _selectedDate.month,
+        ));
   }
 
   void _loadPayments() {
@@ -53,15 +54,15 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
         break;
       case 'monthly':
         context.read<PaymentBloc>().add(LoadPaymentsByMonth(
-          year: _selectedDate.year,
-          month: _selectedDate.month,
-        ));
+              year: _selectedDate.year,
+              month: _selectedDate.month,
+            ));
         break;
       case 'search':
         if (_searchController.text.trim().isNotEmpty) {
           context.read<PaymentBloc>().add(SearchPaymentsByStudentName(
-            studentName: _searchController.text.trim(),
-          ));
+                studentName: _searchController.text.trim(),
+              ));
         }
         break;
       default:
@@ -71,9 +72,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
 
   void _loadUnpaidStudents() {
     context.read<PaymentBloc>().add(LoadUnpaidStudents(
-      year: _selectedDate.year,
-      month: _selectedDate.month,
-    ));
+          year: _selectedDate.year,
+          month: _selectedDate.month,
+        ));
   }
 
   @override
@@ -163,7 +164,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -224,7 +226,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
             children: [
               // Filter dropdown
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(8),
@@ -250,15 +253,17 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                   },
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Date picker (for monthly filter and unpaid students)
-              if (_selectedFilter == 'monthly' || _tabController.index == 1) ...[
+              if (_selectedFilter == 'monthly' ||
+                  _tabController.index == 1) ...[
                 Icon(Icons.calendar_month, color: Colors.grey[600]),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -279,9 +284,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                   ),
                 ),
               ],
-              
+
               const Spacer(),
-              
+
               ElevatedButton.icon(
                 onPressed: () {
                   if (_tabController.index == 0) {
@@ -295,7 +300,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -303,7 +309,7 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
               ),
             ],
           ),
-          
+
           // Second row: Search field (only for search filter)
           if (_selectedFilter == 'search') ...[
             const SizedBox(height: 16),
@@ -378,7 +384,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
       return _buildEmptyState('No payments found for the selected criteria');
     }
 
-    final totalAmount = payments.fold<double>(0, (sum, payment) => sum + payment.amount);
+    final totalAmount =
+        payments.fold<double>(0, (sum, payment) => sum + payment.amount);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -429,7 +436,7 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${NumberFormat('#,##0.00').format(totalAmount)}',
+                        NumberFormat('#,##0.0').format(totalAmount),
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -440,7 +447,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -457,9 +465,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           Text(
             'Payment History',
             style: TextStyle(
@@ -468,9 +476,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
               color: Colors.grey[800],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Payments list
           ListView.builder(
             shrinkWrap: true,
@@ -491,10 +499,12 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
 
   Widget _buildUnpaidStudentsList(List<UnpaidStudentModel> unpaidStudents) {
     if (unpaidStudents.isEmpty) {
-      return _buildEmptyState('All students have paid for ${DateFormat('MMMM yyyy').format(_selectedDate)}');
+      return _buildEmptyState(
+          'All students have paid for ${DateFormat('MMMM yyyy').format(_selectedDate)}');
     }
 
-    final totalUnpaid = unpaidStudents.fold<double>(0, (sum, student) => sum + student.remainingAmount);
+    final totalUnpaid = unpaidStudents.fold<double>(
+        0, (sum, student) => sum + student.remainingAmount);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -545,7 +555,7 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${NumberFormat('#,##0.00').format(totalUnpaid)}',
+                        NumberFormat('#,##0.0').format(totalUnpaid),
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -556,7 +566,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -573,9 +584,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           Text(
             'Unpaid Students - ${DateFormat('MMMM yyyy').format(_selectedDate)}',
             style: TextStyle(
@@ -584,9 +595,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
               color: Colors.grey[800],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Unpaid students list
           ListView.builder(
             shrinkWrap: true,
@@ -595,7 +606,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
             itemBuilder: (context, index) {
               return UnpaidStudentCard(
                 student: unpaidStudents[index],
-                onMakePayment: () => _showCreatePaymentForStudent(unpaidStudents[index]),
+                onMakePayment: () =>
+                    _showCreatePaymentForStudent(unpaidStudents[index]),
               );
             },
           ),
@@ -718,7 +730,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -752,7 +765,7 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
       setState(() {
         _selectedDate = picked;
       });
-      
+
       if (_tabController.index == 0 && _selectedFilter == 'monthly') {
         _loadPayments();
       } else if (_tabController.index == 1) {
@@ -780,6 +793,8 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
           prefilledStudentId: student.id,
           prefilledGroupId: student.groupId,
           prefilledAmount: student.remainingAmount,
+          prefilledStudentName: student.fullName, // Add this
+          prefilledGroupName: student.groupName, // Add this
         ),
       ),
     );
@@ -820,9 +835,9 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Are you sure you want to delete this payment?',
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
             Container(
@@ -845,11 +860,13 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
                   ),
                   const SizedBox(height: 8),
                   Text('Student: ${payment.studentName}'),
-                  Text('Amount: \$${NumberFormat('#,##0.00').format(payment.amount)}'),
+                  Text(
+                      'Amount: ${NumberFormat('#,##0.0').format(payment.amount)}'),
                   Text('Course: ${payment.courseName}'),
                   if (payment.groupName != null)
                     Text('Group: ${payment.groupName}'),
-                  Text('Date: ${DateFormat('MMM dd, yyyy').format(payment.createdAt)}'),
+                  Text(
+                      'Date: ${DateFormat('MMM dd, yyyy').format(payment.createdAt)}'),
                 ],
               ),
             ),

@@ -1,6 +1,9 @@
+// lib/features/groups/presentation/widgets/create_group_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/group_bloc.dart';
+import '../../../teachers/presentation/bloc/teacher_bloc.dart';
+import '../../../teachers/data/models/teacher_model.dart';
 
 class CreateGroupDialog extends StatefulWidget {
   final int courseId;
@@ -26,8 +29,21 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   List<String> _selectedDays = [];
   
   final List<String> _daysOfWeek = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load teachers for the current branch when dialog opens
+    _loadTeachers();
+  }
+
+  void _loadTeachers() {
+    context.read<TeacherBloc>().add(
+      TeacherLoadByBranchRequested(branchId: widget.branchId),
+    );
+  }
 
   @override
   void dispose() {
@@ -127,21 +143,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
             const SizedBox(height: 16),
             
             // Teacher Selection
-            DropdownButtonFormField<int>(
-              value: _selectedTeacherId,
-              decoration: const InputDecoration(
-                labelText: 'Teacher',
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-              ),
-              items: const [], // TODO: Load teachers from API
-              onChanged: (value) {
-                setState(() {
-                  _selectedTeacherId = value;
-                });
-              },
-              hint: const Text('Select a teacher (optional)'),
-            ),
+            _buildTeacherDropdown(),
             const SizedBox(height: 16),
             
             // Time Selection - Responsive layout
@@ -180,6 +182,127 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
     );
   }
 
+  Widget _buildTeacherDropdown() {
+    return BlocBuilder<TeacherBloc, TeacherState>(
+      builder: (context, state) {
+        if (state is TeacherLoading) {
+          return Container(
+            decoration: const BoxDecoration(
+              border: Border.fromBorderSide(BorderSide(color: Colors.grey)),
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+            ),
+            child: const ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Loading teachers...'),
+              trailing: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        } else if (state is TeacherLoaded) {
+          final teachers = state.teachers;
+
+          return DropdownButtonFormField<int?>(
+            value: _selectedTeacherId,
+            decoration: InputDecoration(
+              labelText: 'Teacher',
+              prefixIcon: const Icon(Icons.person),
+              border: const OutlineInputBorder(),
+              suffixIcon: teachers.isEmpty 
+                ? IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _loadTeachers,
+                    tooltip: 'Refresh teachers',
+                  )
+                : null,
+            ),
+            items: [
+              const DropdownMenuItem<int?>(
+                value: null,
+                child: Text(
+                  'No teacher assigned',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+              ...teachers.map((teacher) {
+                return DropdownMenuItem<int?>(
+                  value: teacher.id,
+                  child: Text('${teacher.firstName} ${teacher.lastName}'),
+                );
+              }).toList(),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _selectedTeacherId = value;
+              });
+            },
+            hint: Text(teachers.isEmpty 
+              ? 'No teachers available' 
+              : 'Select a teacher (optional)'),
+          );
+        } else if (state is TeacherError) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.red),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.error, color: Colors.red[700]),
+                  title: const Text('Error loading teachers'),
+                  subtitle: Text(
+                    state.message,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _loadTeachers,
+                    tooltip: 'Retry loading teachers',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'You can still create the group without a teacher',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          );
+        }
+
+        // Initial state - show a basic dropdown
+        return DropdownButtonFormField<int?>(
+          value: _selectedTeacherId,
+          decoration: const InputDecoration(
+            labelText: 'Teacher',
+            prefixIcon: Icon(Icons.person),
+            border: OutlineInputBorder(),
+          ),
+          items: const [
+            DropdownMenuItem<int?>(
+              value: null,
+              child: Text('No teacher assigned'),
+            ),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedTeacherId = value;
+            });
+          },
+          hint: const Text('Loading teachers...'),
+        );
+      },
+    );
+  }
+
   Widget _buildTimeField(BuildContext context, String label, TimeOfDay? time, bool isStartTime) {
     return InkWell(
       onTap: () => _selectTime(context, isStartTime),
@@ -188,6 +311,20 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
           labelText: label,
           prefixIcon: const Icon(Icons.access_time),
           border: const OutlineInputBorder(),
+          suffixIcon: time != null
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () {
+                    setState(() {
+                      if (isStartTime) {
+                        _startTime = null;
+                      } else {
+                        _endTime = null;
+                      }
+                    });
+                  },
+                )
+              : null,
         ),
         child: Text(
           time?.format(context) ?? 'Select $label',
@@ -287,6 +424,14 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
         listener: (context, state) {
           if (state is GroupOperationSuccess) {
             Navigator.of(context).pop();
+          } else if (state is GroupError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
           }
         },
         builder: (context, state) {

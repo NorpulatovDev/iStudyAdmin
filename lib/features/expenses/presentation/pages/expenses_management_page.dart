@@ -29,9 +29,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
     switch (_selectedFilter) {
       case 'monthly':
         context.read<ExpenseBloc>().add(LoadMonthlyExpenses(
-          year: _selectedDate.year,
-          month: _selectedDate.month,
-        ));
+              year: _selectedDate.year,
+              month: _selectedDate.month,
+            ));
         break;
       case 'daily':
         context.read<ExpenseBloc>().add(LoadDailyExpenses(date: _selectedDate));
@@ -142,7 +142,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -194,9 +195,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
               },
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Date picker (only for monthly/daily)
           if (_selectedFilter != 'all') ...[
             Icon(Icons.calendar_month, color: Colors.grey[600]),
@@ -214,8 +215,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
                 onTap: _showDatePicker,
                 child: Text(
                   _selectedFilter == 'monthly'
-                      ? DateFormat('MMMM yyyy').format(_selectedDate)
-                      : DateFormat('MMM dd, yyyy').format(_selectedDate),
+                      ? DateFormat('MMMM yyyy').format(_selectedDate.toLocal())
+                      : DateFormat('MMM dd, yyyy')
+                          .format(_selectedDate.toLocal()),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -225,9 +227,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
               ),
             ),
           ],
-          
+
           const Spacer(),
-          
+
           ElevatedButton.icon(
             onPressed: _loadExpenses,
             icon: const Icon(Icons.refresh, size: 18),
@@ -254,7 +256,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
     // Group expenses by category for better organization
     final groupedExpenses = <String, List<ExpenseModel>>{};
     for (final expense in expenses) {
-      final category = ExpenseCategoryExtension.fromString(expense.category).displayName;
+      final category =
+          ExpenseCategoryExtension.fromString(expense.category).displayName;
       groupedExpenses.putIfAbsent(category, () => []).add(expense);
     }
 
@@ -265,9 +268,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
         children: [
           // Summary section
           if (total != null) _buildSummarySection(total, expenses),
-          
+
           const SizedBox(height: 24),
-          
+
           Text(
             'Expense Details',
             style: TextStyle(
@@ -276,9 +279,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
               color: Colors.grey[800],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Expenses by category
           ...groupedExpenses.entries.map((entry) {
             return _buildCategorySection(entry.key, entry.value);
@@ -292,10 +295,12 @@ class _ExpensesPageState extends State<ExpensesPage> {
     // Calculate category totals
     final categoryTotals = <String, double>{};
     for (final expense in expenses) {
-      final category = ExpenseCategoryExtension.fromString(expense.category).displayName;
-      categoryTotals[category] = (categoryTotals[category] ?? 0) + expense.amount;
+      final category =
+          ExpenseCategoryExtension.fromString(expense.category).displayName;
+      categoryTotals[category] =
+          (categoryTotals[category] ?? 0) + expense.amount;
     }
-    
+
     final sortedCategories = categoryTotals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
@@ -353,7 +358,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                 ),
               ),
               Text(
-                '\$${NumberFormat('#,##0.00').format(total)}',
+                NumberFormat('#,##0.0').format(total),
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -362,9 +367,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Category breakdown
           Row(
             children: [
@@ -393,7 +398,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${NumberFormat('#,##0').format(entry.value)}',
+                          NumberFormat('#,##0').format(entry.value),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -419,8 +424,9 @@ class _ExpensesPageState extends State<ExpensesPage> {
   }
 
   Widget _buildCategorySection(String category, List<ExpenseModel> expenses) {
-    final categoryTotal = expenses.fold<double>(0, (sum, expense) => sum + expense.amount);
-    
+    final categoryTotal =
+        expenses.fold<double>(0, (sum, expense) => sum + expense.amount);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
@@ -481,7 +487,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${expenses.length} expenses • \$${NumberFormat('#,##0.00').format(categoryTotal)}',
+                        '${expenses.length} expenses • ${NumberFormat('#,##0.0').format(categoryTotal)}',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -572,7 +578,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -642,7 +649,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -801,11 +809,14 @@ class _ExpensesPageState extends State<ExpensesPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text('Amount: \$${NumberFormat('#,##0.00').format(expense.amount)}'),
-                  Text('Category: ${ExpenseCategoryExtension.fromString(expense.category).displayName}'),
+                  Text(
+                      'Amount: ${NumberFormat('#,##0.0').format(expense.amount)}'),
+                  Text(
+                      'Category: ${ExpenseCategoryExtension.fromString(expense.category).displayName}'),
                   if (expense.description != null)
                     Text('Description: ${expense.description}'),
-                  Text('Date: ${DateFormat('MMM dd, yyyy').format(expense.createdAt)}'),
+                  Text(
+                      'Date: ${DateFormat('MMM dd, yyyy').format(expense.createdAt.toLocal())}'),
                 ],
               ),
             ),

@@ -15,6 +15,8 @@ class PaymentFormDialog extends StatefulWidget {
   final int? prefilledStudentId;
   final int? prefilledGroupId;
   final double? prefilledAmount;
+  final String? prefilledStudentName; // Add student name for display
+  final String? prefilledGroupName; // Add group name for display
 
   const PaymentFormDialog({
     super.key,
@@ -22,6 +24,8 @@ class PaymentFormDialog extends StatefulWidget {
     this.prefilledStudentId,
     this.prefilledGroupId,
     this.prefilledAmount,
+    this.prefilledStudentName,
+    this.prefilledGroupName,
   });
 
   @override
@@ -51,12 +55,13 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
   bool _isLoadingStudents = false;
 
   bool get isEditing => widget.payment != null;
+  bool get isPrefilledPayment => widget.prefilledStudentId != null && widget.prefilledGroupId != null;
 
   @override
   void initState() {
     super.initState();
     _initializeForm();
-    if (!isEditing) {
+    if (!isEditing && !isPrefilledPayment) {
       _loadCourses();
     }
   }
@@ -117,12 +122,6 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                 _courses = state.courses;
                 _isLoadingCourses = false;
               });
-
-              // Auto-select if prefilled course info is available
-              if (widget.prefilledGroupId != null && _courses.isNotEmpty) {
-                // Find course by checking groups (this would need group data)
-                _loadCourses(); // For now, just load courses
-              }
             } else if (state is CourseError) {
               setState(() => _isLoadingCourses = false);
               _showErrorSnackBar('Failed to load courses: ${state.message}');
@@ -136,16 +135,6 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                 _groups = state.groups;
                 _isLoadingGroups = false;
               });
-
-              // Auto-select if prefilled group ID is available
-              if (widget.prefilledGroupId != null && _groups.isNotEmpty) {
-                final prefilledGroup = _groups.firstWhere(
-                  (group) => group.id == widget.prefilledGroupId,
-                  orElse: () => _groups.first,
-                );
-                setState(() => _selectedGroup = prefilledGroup);
-                _loadStudentsByGroup(prefilledGroup.id);
-              }
             } else if (state is GroupError) {
               setState(() => _isLoadingGroups = false);
               _showErrorSnackBar('Failed to load groups: ${state.message}');
@@ -159,15 +148,6 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                 _students = state.students;
                 _isLoadingStudents = false;
               });
-
-              // Auto-select if prefilled student ID is available
-              if (widget.prefilledStudentId != null && _students.isNotEmpty) {
-                final prefilledStudent = _students.firstWhere(
-                  (student) => student.id == widget.prefilledStudentId,
-                  orElse: () => _students.first,
-                );
-                setState(() => _selectedStudent = prefilledStudent);
-              }
             } else if (state is StudentError) {
               setState(() => _isLoadingStudents = false);
               _showErrorSnackBar('Failed to load students: ${state.message}');
@@ -212,7 +192,11 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           ),
           const SizedBox(width: 12),
           Text(
-            isEditing ? 'Edit Payment Amount' : 'Create New Payment',
+            isEditing 
+                ? 'Edit Payment Amount' 
+                : isPrefilledPayment 
+                    ? 'Make Payment'
+                    : 'Create New Payment',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -246,8 +230,20 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
               if (widget.payment!.groupName != null)
                 _buildReadOnlyField('Group', widget.payment!.groupName!),
               const SizedBox(height: 16),
+            ] else if (isPrefilledPayment) ...[
+              // Show prefilled student and group info for quick payment
+              if (widget.prefilledStudentName != null)
+                _buildReadOnlyField('Student', widget.prefilledStudentName!),
+              const SizedBox(height: 16),
+              if (widget.prefilledGroupName != null)
+                _buildReadOnlyField('Group', widget.prefilledGroupName!),
+              const SizedBox(height: 16),
+              
+              // Payment date selector for prefilled payments
+              _buildDateSelector(),
+              const SizedBox(height: 16),
             ] else ...[
-              // Course selection dropdown
+              // Full course/group/student selection for new payments
               _buildDropdownField<CourseModel>(
                 label: 'Select Course *',
                 value: _selectedCourse,
@@ -276,7 +272,6 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
 
               const SizedBox(height: 16),
 
-              // Group selection dropdown
               _buildDropdownField<GroupModel>(
                 label: 'Select Group *',
                 value: _selectedGroup,
@@ -306,7 +301,6 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
 
               const SizedBox(height: 16),
 
-              // Student selection dropdown
               _buildDropdownField<StudentModel>(
                 label: 'Select Student *',
                 value: _selectedStudent,
@@ -332,7 +326,6 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
 
               // Payment date selector
               _buildDateSelector(),
-
               const SizedBox(height: 16),
             ],
 
@@ -377,10 +370,49 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
               textCapitalization: TextCapitalization.sentences,
             ),
 
-            if (!isEditing) ...[
+            if (isPrefilledPayment) ...[
               const SizedBox(height: 16),
-
-              // Information card
+              // Information card for prefilled payments
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.info, color: Colors.orange[700], size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Quick Payment',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Colors.orange[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Creating payment for an unpaid student. Student and group information is already filled. Only enter the payment amount and description.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (!isEditing) ...[
+              const SizedBox(height: 16),
+              // Information card for regular payments
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -624,7 +656,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(isEditing ? 'Update' : 'Create'),
+                    : Text(isEditing ? 'Update' : 'Create Payment'),
               ),
             ],
           );
@@ -670,8 +702,18 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
             id: widget.payment!.id,
             amount: amount,
           ));
+    } else if (isPrefilledPayment) {
+      // Create payment with prefilled data (from unpaid students)
+      context.read<PaymentBloc>().add(CreatePayment(
+            studentId: widget.prefilledStudentId!,
+            groupId: widget.prefilledGroupId!,
+            amount: amount,
+            description: description.isNotEmpty ? description : null,
+            paymentYear: _selectedDate.year,
+            paymentMonth: _selectedDate.month,
+          ));
     } else {
-      // Create new payment
+      // Create new payment with selected data
       if (_selectedStudent == null || _selectedGroup == null) {
         _showErrorSnackBar('Please select student and group');
         return;
