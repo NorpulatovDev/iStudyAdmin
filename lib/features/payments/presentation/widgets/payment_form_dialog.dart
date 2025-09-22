@@ -3,6 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/payment_bloc.dart';
 import '../../data/models/payment_model.dart';
+import '../../../courses/presentation/bloc/course_bloc.dart';
+import '../../../courses/data/models/course_model.dart';
+import '../../../groups/presentation/bloc/group_bloc.dart';
+import '../../../groups/data/models/group_model.dart';
+import '../../../students/presentation/bloc/student_bloc.dart';
+import '../../../students/data/models/student_model.dart';
 
 class PaymentFormDialog extends StatefulWidget {
   final PaymentModel? payment; // For editing existing payment
@@ -24,19 +30,35 @@ class PaymentFormDialog extends StatefulWidget {
 
 class _PaymentFormDialogState extends State<PaymentFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _studentIdController = TextEditingController();
-  final _groupIdController = TextEditingController();
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   DateTime _selectedDate = DateTime.now();
-  
+
+  // Dropdown selections
+  CourseModel? _selectedCourse;
+  GroupModel? _selectedGroup;
+  StudentModel? _selectedStudent;
+
+  // Data lists
+  List<CourseModel> _courses = [];
+  List<GroupModel> _groups = [];
+  List<StudentModel> _students = [];
+
+  // Loading states
+  bool _isLoadingCourses = false;
+  bool _isLoadingGroups = false;
+  bool _isLoadingStudents = false;
+
   bool get isEditing => widget.payment != null;
 
   @override
   void initState() {
     super.initState();
     _initializeForm();
+    if (!isEditing) {
+      _loadCourses();
+    }
   }
 
   void _initializeForm() {
@@ -46,22 +68,39 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
       _descriptionController.text = widget.payment!.description ?? '';
     } else {
       // Creating new payment with prefilled data
-      if (widget.prefilledStudentId != null) {
-        _studentIdController.text = widget.prefilledStudentId.toString();
-      }
-      if (widget.prefilledGroupId != null) {
-        _groupIdController.text = widget.prefilledGroupId.toString();
-      }
       if (widget.prefilledAmount != null) {
         _amountController.text = widget.prefilledAmount.toString();
       }
     }
   }
 
+  void _loadCourses() async {
+    setState(() => _isLoadingCourses = true);
+    context.read<CourseBloc>().add(const CourseLoadRequested());
+  }
+
+  void _loadGroupsByCourse(int courseId) async {
+    setState(() {
+      _isLoadingGroups = true;
+      _selectedGroup = null;
+      _selectedStudent = null;
+      _groups = [];
+      _students = [];
+    });
+    context.read<GroupBloc>().add(GroupLoadByCourseRequested(courseId));
+  }
+
+  void _loadStudentsByGroup(int groupId) async {
+    setState(() {
+      _isLoadingStudents = true;
+      _selectedStudent = null;
+      _students = [];
+    });
+    context.read<StudentBloc>().add(StudentLoadByGroupRequested(groupId));
+  }
+
   @override
   void dispose() {
-    _studentIdController.dispose();
-    _groupIdController.dispose();
     _amountController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -69,18 +108,86 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      insetPadding: const EdgeInsets.all(16),
-      child: Container(
-        width: double.infinity,
-        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(),
-            Expanded(child: _buildForm()),
-            _buildActionButtons(),
-          ],
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CourseBloc, CourseState>(
+          listener: (context, state) {
+            if (state is CourseLoaded) {
+              setState(() {
+                _courses = state.courses;
+                _isLoadingCourses = false;
+              });
+
+              // Auto-select if prefilled course info is available
+              if (widget.prefilledGroupId != null && _courses.isNotEmpty) {
+                // Find course by checking groups (this would need group data)
+                _loadCourses(); // For now, just load courses
+              }
+            } else if (state is CourseError) {
+              setState(() => _isLoadingCourses = false);
+              _showErrorSnackBar('Failed to load courses: ${state.message}');
+            }
+          },
+        ),
+        BlocListener<GroupBloc, GroupState>(
+          listener: (context, state) {
+            if (state is GroupLoaded) {
+              setState(() {
+                _groups = state.groups;
+                _isLoadingGroups = false;
+              });
+
+              // Auto-select if prefilled group ID is available
+              if (widget.prefilledGroupId != null && _groups.isNotEmpty) {
+                final prefilledGroup = _groups.firstWhere(
+                  (group) => group.id == widget.prefilledGroupId,
+                  orElse: () => _groups.first,
+                );
+                setState(() => _selectedGroup = prefilledGroup);
+                _loadStudentsByGroup(prefilledGroup.id);
+              }
+            } else if (state is GroupError) {
+              setState(() => _isLoadingGroups = false);
+              _showErrorSnackBar('Failed to load groups: ${state.message}');
+            }
+          },
+        ),
+        BlocListener<StudentBloc, StudentState>(
+          listener: (context, state) {
+            if (state is StudentLoaded) {
+              setState(() {
+                _students = state.students;
+                _isLoadingStudents = false;
+              });
+
+              // Auto-select if prefilled student ID is available
+              if (widget.prefilledStudentId != null && _students.isNotEmpty) {
+                final prefilledStudent = _students.firstWhere(
+                  (student) => student.id == widget.prefilledStudentId,
+                  orElse: () => _students.first,
+                );
+                setState(() => _selectedStudent = prefilledStudent);
+              }
+            } else if (state is StudentError) {
+              setState(() => _isLoadingStudents = false);
+              _showErrorSnackBar('Failed to load students: ${state.message}');
+            }
+          },
+        ),
+      ],
+      child: Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHeader(),
+              Expanded(child: _buildForm()),
+              _buildActionButtons(),
+            ],
+          ),
         ),
       ),
     );
@@ -140,99 +247,95 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                 _buildReadOnlyField('Group', widget.payment!.groupName!),
               const SizedBox(height: 16),
             ] else ...[
-              // Student ID field for new payments
-              TextFormField(
-                controller: _studentIdController,
-                decoration: const InputDecoration(
-                  labelText: 'Student ID *',
-                  hintText: 'Enter student ID',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(),
+              // Course selection dropdown
+              _buildDropdownField<CourseModel>(
+                label: 'Select Course *',
+                value: _selectedCourse,
+                items: _courses,
+                isLoading: _isLoadingCourses,
+                itemBuilder: (course) => DropdownMenuItem<CourseModel>(
+                  value: course,
+                  child: Text(
+                    course.name,
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Student ID is required';
+                onChanged: (course) {
+                  setState(() {
+                    _selectedCourse = course;
+                    _selectedGroup = null;
+                    _selectedStudent = null;
+                  });
+                  if (course != null) {
+                    _loadGroupsByCourse(course.id);
                   }
-                  final id = int.tryParse(value);
-                  if (id == null || id <= 0) {
-                    return 'Enter a valid student ID';
-                  }
-                  return null;
                 },
+                validator: (value) =>
+                    value == null ? 'Please select a course' : null,
               ),
-              
+
               const SizedBox(height: 16),
-              
-              // Group ID field
-              TextFormField(
-                controller: _groupIdController,
-                decoration: const InputDecoration(
-                  labelText: 'Group ID *',
-                  hintText: 'Enter group ID',
-                  prefixIcon: Icon(Icons.group),
-                  border: OutlineInputBorder(),
+
+              // Group selection dropdown
+              _buildDropdownField<GroupModel>(
+                label: 'Select Group *',
+                value: _selectedGroup,
+                items: _groups,
+                isLoading: _isLoadingGroups,
+                enabled: _selectedCourse != null && !_isLoadingGroups,
+                itemBuilder: (group) => DropdownMenuItem<GroupModel>(
+                  value: group,
+                  child: Text(
+                    group.name,
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
                 ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Group ID is required';
+                onChanged: (group) {
+                  setState(() {
+                    _selectedGroup = group;
+                    _selectedStudent = null;
+                  });
+                  if (group != null) {
+                    _loadStudentsByGroup(group.id);
                   }
-                  final id = int.tryParse(value);
-                  if (id == null || id <= 0) {
-                    return 'Enter a valid group ID';
-                  }
-                  return null;
                 },
+                validator: (value) =>
+                    value == null ? 'Please select a group' : null,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
+              // Student selection dropdown
+              _buildDropdownField<StudentModel>(
+                label: 'Select Student *',
+                value: _selectedStudent,
+                items: _students,
+                isLoading: _isLoadingStudents,
+                enabled: _selectedGroup != null && !_isLoadingStudents,
+                itemBuilder: (student) => DropdownMenuItem<StudentModel>(
+                  value: student,
+                  child: Text(
+                    '${student.firstName} ${student.lastName}',
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                onChanged: (student) {
+                  setState(() => _selectedStudent = student);
+                },
+                validator: (value) =>
+                    value == null ? 'Please select a student' : null,
+              ),
+
+              const SizedBox(height: 16),
+
               // Payment date selector
-              InkWell(
-                onTap: _selectDate,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Payment Date *',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${_selectedDate.month}/${_selectedDate.year}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      const Icon(Icons.arrow_drop_down),
-                    ],
-                  ),
-                ),
-              ),
-              
+              _buildDateSelector(),
+
               const SizedBox(height: 16),
             ],
-            
+
             // Amount field (always editable)
             TextFormField(
               controller: _amountController,
@@ -242,7 +345,8 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                 prefixIcon: Icon(Icons.attach_money),
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
@@ -257,9 +361,9 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                 return null;
               },
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Description field
             TextFormField(
               controller: _descriptionController,
@@ -272,10 +376,10 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
             ),
-            
+
             if (!isEditing) ...[
               const SizedBox(height: 16),
-              
+
               // Information card
               Container(
                 width: double.infinity,
@@ -304,7 +408,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Make sure to verify the student ID and group ID before creating the payment. The payment date determines the month/year for which this payment is recorded.',
+                      'Select the course first, then choose the group, and finally select the student. The payment date determines the month/year for which this payment is recorded.',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[700],
@@ -318,6 +422,139 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required String label,
+    required T? value,
+    required List<T> items,
+    required DropdownMenuItem<T> Function(T) itemBuilder,
+    required void Function(T?) onChanged,
+    required String? Function(T?) validator,
+    bool isLoading = false,
+    bool enabled = true,
+    String? emptyMessage,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: isLoading
+              ? const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(
+                    child: SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                )
+              : enabled && items.isEmpty && emptyMessage != null
+                  ? Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline,
+                              color: Colors.orange[600], size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              emptyMessage,
+                              style: TextStyle(
+                                color: Colors.orange[700],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : DropdownButtonFormField<T>(
+                      value: value,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      hint: Text(
+                        enabled
+                            ? (items.isEmpty
+                                ? 'No options available'
+                                : 'Select an option')
+                            : 'Select previous options first',
+                        style: TextStyle(color: Colors.grey[500]),
+                      ),
+                      items: enabled && items.isNotEmpty
+                          ? items.map(itemBuilder).toList()
+                          : [],
+                      onChanged: enabled && items.isNotEmpty ? onChanged : null,
+                      validator: validator,
+                      isExpanded: true,
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Payment Date *',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: _selectDate,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.calendar_today),
+                const SizedBox(width: 12),
+                Text(
+                  '${_selectedDate.month}/${_selectedDate.year}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                const Icon(Icons.arrow_drop_down),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -370,7 +607,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
         },
         builder: (context, state) {
           final isLoading = state is PaymentLoading;
-          
+
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -430,22 +667,34 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
     if (isEditing) {
       // Update payment amount
       context.read<PaymentBloc>().add(UpdatePaymentAmount(
-        id: widget.payment!.id,
-        amount: amount,
-      ));
+            id: widget.payment!.id,
+            amount: amount,
+          ));
     } else {
       // Create new payment
-      final studentId = int.parse(_studentIdController.text);
-      final groupId = int.parse(_groupIdController.text);
-      
+      if (_selectedStudent == null || _selectedGroup == null) {
+        _showErrorSnackBar('Please select student and group');
+        return;
+      }
+
       context.read<PaymentBloc>().add(CreatePayment(
-        studentId: studentId,
-        groupId: groupId,
-        amount: amount,
-        description: description.isNotEmpty ? description : null,
-        paymentYear: _selectedDate.year,
-        paymentMonth: _selectedDate.month,
-      ));
+            studentId: _selectedStudent!.id,
+            groupId: _selectedGroup!.id,
+            amount: amount,
+            description: description.isNotEmpty ? description : null,
+            paymentYear: _selectedDate.year,
+            paymentMonth: _selectedDate.month,
+          ));
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }

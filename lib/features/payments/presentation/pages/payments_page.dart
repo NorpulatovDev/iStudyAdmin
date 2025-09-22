@@ -20,7 +20,7 @@ class _PaymentsPageState extends State<PaymentsPage> with TickerProviderStateMix
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  String _selectedFilter = 'all'; // all, recent, monthly, search
+  String _selectedFilter = 'recent'; // all, recent, monthly, search
 
   @override
   void initState() {
