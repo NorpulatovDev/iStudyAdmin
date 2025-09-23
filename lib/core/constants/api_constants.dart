@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'https://iStudy-production.up.railway.app/api';
+  static const String baseUrl = 'https://istudy-production-0eec.up.railway.app/api';
 
   // Auth endpoints
   static const String loginEndpoint = '/auth/login';
