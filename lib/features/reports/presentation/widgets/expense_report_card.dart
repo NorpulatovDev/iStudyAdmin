@@ -75,7 +75,7 @@ class ExpenseReportCard extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  '\$${NumberFormat('#,##0.00').format(report.totalExpenses)}',
+                  NumberFormat('#,##0.0').format(report.totalExpenses),
                   style: const TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
@@ -243,7 +243,7 @@ class ExpenseReportCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '\$${NumberFormat('#,##0.00').format(amount)}',
+            NumberFormat('#,##0.0').format(amount),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -549,9 +549,9 @@ class ExpenseReportCard extends StatelessWidget {
               _buildDetailRow('Period', _getPeriodDescription()),
               _buildDetailRow('Branch ID', '${report.branchId}'),
               const Divider(),
-              _buildDetailRow('Regular Expenses', '\$${NumberFormat('#,##0.00').format(report.regularExpenses)}'),
-              _buildDetailRow('Salary Expenses', '\$${NumberFormat('#,##0.00').format(report.salaryExpenses)}'),
-              _buildDetailRow('Total Expenses', '\$${NumberFormat('#,##0.00').format(report.totalExpenses)}'),
+              _buildDetailRow('Regular Expenses', NumberFormat('#,##0.0').format(report.regularExpenses)),
+              _buildDetailRow('Salary Expenses', NumberFormat('#,##0.0').format(report.salaryExpenses)),
+              _buildDetailRow('Total Expenses', NumberFormat('#,##0.0').format(report.totalExpenses)),
               
               const SizedBox(height: 24),
               

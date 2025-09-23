@@ -75,7 +75,7 @@ class PaymentReportCard extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  '\$${NumberFormat('#,##0.00').format(report.totalPayments)}',
+                  NumberFormat('#,##0.0').format(report.totalPayments),
                   style: const TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
@@ -373,7 +373,7 @@ class PaymentReportCard extends StatelessWidget {
               _buildDetailRow('Report Type', _getReportTypeDisplay()),
               _buildDetailRow('Period', _getPeriodDescription()),
               _buildDetailRow('Branch ID', '${report.branchId}'),
-              _buildDetailRow('Total Payments', '\$${NumberFormat('#,##0.00').format(report.totalPayments)}'),
+              _buildDetailRow('Total Payments', NumberFormat('#,##0.0').format(report.totalPayments)),
               
               if (report.year != null)
                 _buildDetailRow('Year', '${report.year}'),

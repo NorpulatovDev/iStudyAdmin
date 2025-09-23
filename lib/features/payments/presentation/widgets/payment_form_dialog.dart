@@ -223,7 +223,7 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
           children: [
             if (isEditing) ...[
               // Show payment details for editing
-              _buildReadOnlyField('Student', widget.payment!.studentName),
+              _buildReadOnlyField('Student', widget.payment!.studentName ?? "Deleted Student"),
               const SizedBox(height: 16),
               _buildReadOnlyField('Course', widget.payment!.courseName),
               const SizedBox(height: 16),

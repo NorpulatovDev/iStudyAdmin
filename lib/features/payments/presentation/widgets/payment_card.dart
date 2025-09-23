@@ -51,7 +51,7 @@ class PaymentCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          payment.studentName,
+                          payment.studentName ?? "Deleted Student",
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

@@ -84,7 +84,7 @@ class FinancialSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${summary.netProfit >= 0 ? '' : '-'}\$${NumberFormat('#,##0.00').format(summary.netProfit.abs())}',
+                  '${summary.netProfit >= 0 ? '' : '-'}${NumberFormat('#,##0.0').format(summary.netProfit.abs())}',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
@@ -264,7 +264,7 @@ class FinancialSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '\$${NumberFormat('#,##0.00').format(amount)}',
+            NumberFormat('#,##0.0').format(amount),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -535,7 +535,7 @@ class FinancialSummaryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildDetailRow('Total Income', '\$${NumberFormat('#,##0.00').format(summary.totalIncome)}'),
+              _buildDetailRow('Total Income', NumberFormat('#,##0.0').format(summary.totalIncome)),
               
               const SizedBox(height: 16),
               
@@ -549,16 +549,16 @@ class FinancialSummaryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildDetailRow('Regular Expenses', '\$${NumberFormat('#,##0.00').format(summary.regularExpenses)}'),
-              _buildDetailRow('Salary Payments', '\$${NumberFormat('#,##0.00').format(summary.salaryPayments)}'),
-              _buildDetailRow('Total Expenses', '\$${NumberFormat('#,##0.00').format(summary.totalExpenses)}'),
+              _buildDetailRow('Regular Expenses', NumberFormat('#,##0.0').format(summary.regularExpenses)),
+              _buildDetailRow('Salary Payments', NumberFormat('#,##0.0').format(summary.salaryPayments)),
+              _buildDetailRow('Total Expenses', NumberFormat('#,##0.0').format(summary.totalExpenses)),
               
               const Divider(),
               
               // Net Result
               _buildDetailRow(
                 summary.netProfit >= 0 ? 'Net Profit' : 'Net Loss',
-                '${summary.netProfit >= 0 ? '' : '-'}\$${NumberFormat('#,##0.00').format(summary.netProfit.abs())}',
+                '${summary.netProfit >= 0 ? '' : '-'}${NumberFormat('#,##0.0').format(summary.netProfit.abs())}',
                 color: _getProfitColor(),
               ),
               

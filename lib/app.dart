@@ -33,7 +33,7 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => AuthBloc(sl<AuthRepository>())
-            ..add(AuthCheckRequested()), // Check if user is already logged in
+            ..add(const AuthCheckRequested(validateWithServer: false)), // Initial check without server validation
         ),
         BlocProvider(
           create: (context) => CourseBloc(sl<CourseRepository>()),
@@ -64,81 +64,91 @@ class App extends StatelessWidget {
         title: "iStudy Admin",
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
-        home: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state is AuthLoading) {
-              return Scaffold(
-                backgroundColor: const Color(0xFFF5F7FA),
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // App Logo
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppTheme.primaryColor,
-                              AppTheme.primaryColor.withOpacity(0.8),
+        home: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            // Handle auth state changes globally
+            if (state is AuthUnauthenticated) {
+              // You can add additional cleanup here if needed
+              // For example, clearing other bloc states
+            }
+          },
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is AuthLoading) {
+                return Scaffold(
+                  backgroundColor: const Color(0xFFF5F7FA),
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // App Logo
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppTheme.primaryColor,
+                                AppTheme.primaryColor.withOpacity(0.8),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primaryColor.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 4),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primaryColor.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                          child: const Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 40,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.school,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // App Title
-                      const Text(
-                        'iStudy Admin',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F2937),
+                        // App Title
+                        const Text(
+                          'iStudy Admin',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1F2937),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                      // Loading Indicator
-                      const CircularProgressIndicator(
-                        color: AppTheme.primaryColor,
-                        strokeWidth: 3,
-                      ),
-                      const SizedBox(height: 16),
-
-                      Text(
-                        'Loading...',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                        // Loading Indicator
+                        const CircularProgressIndicator(
+                          color: AppTheme.primaryColor,
+                          strokeWidth: 3,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+
+                        Text(
+                          'Loading...',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }
+                );
+              }
 
-            if (state is AuthAuthenticated) {
-              return const MainLayout();
-            }
+              if (state is AuthAuthenticated) {
+                return const MainLayout();
+              }
 
-            return const LoginPage();
-          },
+              // Show login page for AuthUnauthenticated, AuthError, and AuthInitial
+              return const LoginPage();
+            },
+          ),
         ),
       ),
     );

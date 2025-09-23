@@ -26,7 +26,7 @@ final sl = GetIt.instance;
 Future<void> setupLocator() async {
   // Core services
   sl.registerLazySingleton<StorageService>(() => StorageService());
-  sl.registerLazySingleton<ApiService>(() => ApiService());
+  sl.registerLazySingleton<ApiService>(() => ApiService(sl<StorageService>()));
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(

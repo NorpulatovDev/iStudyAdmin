@@ -362,20 +362,22 @@ class _SalaryPageState extends State<SalaryPage> {
   }
 
   Widget _buildSalaryOverview(List<SalaryCalculationModel> calculations) {
-    final totalSalary = calculations.fold<double>(
-      0.0,
-      (sum, calc) => sum + calc.totalSalary,
-    );
-    final totalPaid = calculations.fold<double>(
-      0.0,
-      (sum, calc) => sum + calc.alreadyPaid,
-    );
-    final totalRemaining = calculations.fold<double>(
-      0.0,
-      (sum, calc) => sum + calc.remainingAmount,
-    );
+  final totalSalary = calculations.fold<double>(
+    0.0,
+    (sum, calc) => sum + calc.totalSalary,
+  );
+  final totalPaid = calculations.fold<double>(
+    0.0,
+    (sum, calc) => sum + calc.alreadyPaid,
+  );
+  final totalRemaining = calculations.fold<double>(
+    0.0,
+    (sum, calc) => sum + calc.remainingAmount,
+  );
 
-    return Column(
+  return SingleChildScrollView( // Make entire content scrollable
+    padding: const EdgeInsets.all(24),
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -442,27 +444,31 @@ class _SalaryPageState extends State<SalaryPage> {
         ),
         const SizedBox(height: 16),
 
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: calculations.isEmpty
-                ? _buildEmptyCalculationsState()
-                : _buildCalculationsTable(calculations),
+        // Table Container - Remove Expanded and make it take natural height
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
+          child: calculations.isEmpty
+              ? _buildEmptyCalculationsState()
+              : _buildCalculationsTable(calculations),
         ),
+        
+        // Add bottom padding for better scrolling experience
+        const SizedBox(height: 24),
       ],
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildSummaryCard(
       String title, String value, IconData icon, Color color) {
@@ -518,91 +524,433 @@ class _SalaryPageState extends State<SalaryPage> {
     );
   }
 
+  // Changes to _buildCalculationsTable method in salary_management_page.dart
+
   Widget _buildCalculationsTable(List<SalaryCalculationModel> calculations) {
-    return SingleChildScrollView(
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Teacher')),
-          DataColumn(label: Text('Base Salary')),
-          DataColumn(label: Text('Payment Based')),
-          DataColumn(label: Text('Total Salary')),
-          DataColumn(label: Text('Already Paid')),
-          DataColumn(label: Text('Remaining')),
-          DataColumn(label: Text('Actions')),
-        ],
-        rows: calculations.map((calc) {
-          return DataRow(
-            cells: [
-              DataCell(
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      calc.teacherName,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      calc.branchName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              DataCell(Text(NumberFormat('#,##0.0').format(calc.baseSalary))),
-              DataCell(Text(
-                NumberFormat('#,##0.0').format(calc.paymentBasedSalary),
-              )),
-              DataCell(
-                Text(
-                  NumberFormat('#,##0.00').format(calc.totalSalary),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              DataCell(
-                Text(
-                  NumberFormat('#,##0.0').format(calc.alreadyPaid),
-                  style: TextStyle(
-                    color: calc.alreadyPaid > 0 ? Colors.green : Colors.grey,
+    return Container(
+      width: double.infinity,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth:
+                MediaQuery.of(context).size.width - 48, // Account for padding
+          ),
+          child: DataTable(
+            columnSpacing: 16, // Reduced from default 56
+            horizontalMargin: 16, // Reduced from default 24
+            headingRowHeight: 48,
+            dataRowHeight: 64, // Increased to accommodate multiline text
+            border: TableBorder.all(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.grey[300]!,
+            ),
+            headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
+            columns: const [
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    'Teacher',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
-              DataCell(
-                Text(
-                  NumberFormat('#,##0.0').format(calc.remainingAmount),
-                  style: TextStyle(
-                    color:
-                        calc.remainingAmount > 0 ? Colors.orange : Colors.green,
-                    fontWeight: FontWeight.w600,
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    'Base\nSalary',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                numeric: true,
               ),
-              DataCell(
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () =>
-                          _navigateToSalaryCalculationWithModel(calc),
-                      icon: const Icon(Icons.visibility, size: 18),
-                      tooltip: 'View Details',
-                    ),
-                    if (calc.remainingAmount > 0)
-                      IconButton(
-                        onPressed: () => _showPaymentDialog(calc),
-                        icon: const Icon(Icons.payment, size: 18),
-                        tooltip: 'Make Payment',
-                      ),
-                  ],
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    'Payment\nBased',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                numeric: true,
+              ),
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    'Total\nSalary',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                numeric: true,
+              ),
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    'Already\nPaid',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                numeric: true,
+              ),
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    'Remaining',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                numeric: true,
+              ),
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    'Actions',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             ],
-          );
-        }).toList(),
+            rows: calculations.map((calc) {
+              return DataRow(
+                cells: [
+                  DataCell(
+                    Container(
+                      width: 120, // Fixed width for teacher name column
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            calc.teacherName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            calc.branchName,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 80, // Fixed width for numeric columns
+                      child: Text(
+                        NumberFormat('#,##0').format(calc.baseSalary),
+                        style: const TextStyle(fontSize: 12),
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 80,
+                      child: Text(
+                        NumberFormat('#,##0').format(calc.paymentBasedSalary),
+                        style: const TextStyle(fontSize: 12),
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 90,
+                      child: Text(
+                        NumberFormat('#,##0').format(calc.totalSalary),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 80,
+                      child: Text(
+                        NumberFormat('#,##0').format(calc.alreadyPaid),
+                        style: TextStyle(
+                          color: calc.alreadyPaid > 0
+                              ? Colors.green[700]
+                              : Colors.grey[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 80,
+                      child: Text(
+                        NumberFormat('#,##0').format(calc.remainingAmount),
+                        style: TextStyle(
+                          color: calc.remainingAmount > 0
+                              ? Colors.orange[700]
+                              : Colors.green[700],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      width: 100, // Fixed width for actions
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () =>
+                                _navigateToSalaryCalculationWithModel(calc),
+                            icon: const Icon(Icons.visibility, size: 16),
+                            tooltip: 'View Details',
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            padding: const EdgeInsets.all(4),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.blue[50],
+                              foregroundColor: Colors.blue[700],
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          if (calc.remainingAmount > 0)
+                            IconButton(
+                              onPressed: () => _showPaymentDialog(calc),
+                              icon: const Icon(Icons.payment, size: 16),
+                              tooltip: 'Make Payment',
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.green[50],
+                                foregroundColor: Colors.green[700],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
       ),
+    );
+  }
+
+// Alternative: Add a card-based layout option for better mobile experience
+// This can be used as a fallback if the table becomes too cramped
+
+  Widget _buildCalculationsCards(List<SalaryCalculationModel> calculations) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: calculations.length,
+      itemBuilder: (context, index) {
+        final calc = calculations[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with teacher name and status
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            calc.teacherName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            calc.branchName,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: calc.remainingAmount > 0
+                            ? Colors.orange[100]
+                            : Colors.green[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        calc.remainingAmount > 0 ? 'Pending' : 'Paid',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: calc.remainingAmount > 0
+                              ? Colors.orange[800]
+                              : Colors.green[800],
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Salary details in grid
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSalaryInfoItem(
+                        'Base Salary',
+                        NumberFormat('#,##0').format(calc.baseSalary),
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildSalaryInfoItem(
+                        'Payment Based',
+                        NumberFormat('#,##0').format(calc.paymentBasedSalary),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSalaryInfoItem(
+                        'Total Salary',
+                        NumberFormat('#,##0').format(calc.totalSalary),
+                        isHighlight: true,
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildSalaryInfoItem(
+                        'Remaining',
+                        NumberFormat('#,##0').format(calc.remainingAmount),
+                        color: calc.remainingAmount > 0
+                            ? Colors.orange[700]
+                            : Colors.green[700],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () =>
+                            _navigateToSalaryCalculationWithModel(calc),
+                        icon: const Icon(Icons.visibility, size: 16),
+                        label: const Text('View Details'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (calc.remainingAmount > 0) ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showPaymentDialog(calc),
+                          icon: const Icon(Icons.payment, size: 16),
+                          label: const Text('Pay'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSalaryInfoItem(String label, String value,
+      {bool isHighlight = false, Color? color}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isHighlight ? 16 : 14,
+            fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
+            color: color ?? Colors.black87,
+          ),
+        ),
+      ],
     );
   }
 

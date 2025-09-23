@@ -7,20 +7,30 @@ sealed class AuthEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class AuthLoginRequested extends AuthEvent{
+class AuthLoginRequested extends AuthEvent {
   final String username;
   final String password;
 
   const AuthLoginRequested({
     required this.username,
-    required this.password
+    required this.password,
   });
 
   @override
   List<Object> get props => [username, password];
 }
 
-class AuthLogoutRequested extends AuthEvent{}
+class AuthLogoutRequested extends AuthEvent {}
 
+class AuthCheckRequested extends AuthEvent {
+  final bool validateWithServer;
 
-class AuthCheckRequested extends AuthEvent{}
+  const AuthCheckRequested({this.validateWithServer = false});
+
+  @override
+  List<Object> get props => [validateWithServer];
+}
+
+class AuthTokenExpired extends AuthEvent {}
+
+class AuthSessionValidationRequested extends AuthEvent {}

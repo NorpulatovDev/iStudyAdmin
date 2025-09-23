@@ -1,4 +1,4 @@
-// lib/features/main/presentation/widgets/app_drawer.dart
+// lib/features/main/presentation/widgets/app_drawer.dart - Mobile Restricted Version
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -8,74 +8,77 @@ class DrawerItem {
   final IconData icon;
   final String title;
   final String subtitle;
+  final bool availableOnMobileTablet; // Add this field
 
   const DrawerItem({
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.availableOnMobileTablet = false, // Default false
   });
 }
 
 class AppDrawer extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
+  final bool isMobileOrTablet; // Add this parameter
 
   const AppDrawer({
     super.key,
     required this.selectedIndex,
     required this.onItemTapped,
+    this.isMobileOrTablet = false, // Add this
   });
 
   static const List<DrawerItem> _drawerItems = [
-    // DrawerItem(
-    //   icon: Icons.dashboard_outlined,
-    //   title: 'Dashboard',
-    //   subtitle: 'Overview & stats',
-    // ),
     DrawerItem(
       icon: Icons.school_outlined,
       title: 'Courses',
       subtitle: 'Manage courses',
+      availableOnMobileTablet: true, // Only this is available on mobile/tablet
     ),
     DrawerItem(
       icon: Icons.people_outline,
       title: 'Students',
       subtitle: 'Student management',
+      availableOnMobileTablet: false,
     ),
     DrawerItem(
       icon: Icons.person_outline,
       title: 'Teachers',
       subtitle: 'Teacher management',
+      availableOnMobileTablet: false,
     ),
-    // DrawerItem(
-    //   icon: Icons.group_outlined,
-    //   title: 'Groups',
-    //   subtitle: 'Class groups',
-    // ),
     DrawerItem(
       icon: Icons.payment_outlined,
       title: 'Payments',
       subtitle: 'Payment records',
+      availableOnMobileTablet: false,
     ),
     DrawerItem(
-      icon: Icons.analytics_outlined,
+      icon: Icons.attach_money_outlined, // Different icon
       title: 'Salary',
       subtitle: 'Salary Management',
+      availableOnMobileTablet: false,
     ),
     DrawerItem(
-      icon: Icons.analytics_outlined,
+      icon: Icons.receipt_long_outlined, // Different icon
       title: 'Expenses',
       subtitle: 'Expense Management',
+      availableOnMobileTablet: false,
     ),
     DrawerItem(
       icon: Icons.analytics_outlined,
       title: 'Reports',
       subtitle: 'Report Management',
+      availableOnMobileTablet: false,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    
     return Drawer(
       child: Container(
         decoration: BoxDecoration(
@@ -87,9 +90,9 @@ class AppDrawer extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Drawer Header
+            // Modified Drawer Header
             Container(
-              height: 250,
+              height: isMobileOrTablet ? 220 : 250,
               width: double.infinity,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -112,32 +115,57 @@ class AppDrawer extends StatelessWidget {
                         children: [
                           // App Logo/Icon
                           Container(
-                            width: 60,
-                            height: 60,
+                            width: isMobileOrTablet ? 50 : 60,
+                            height: isMobileOrTablet ? 50 : 60,
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.school,
                               color: Colors.white,
-                              size: 32,
+                              size: isMobileOrTablet ? 28 : 32,
                             ),
                           ),
                           const SizedBox(height: 16),
 
-                          // App Title
-                          const Text(
-                            'iStudy Admin',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          // App Title with device indicator
+                          Row(
+                            children: [
+                              const Text(
+                                'iStudy Admin',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (isMobileOrTablet) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    isMobile ? 'Mobile' : 'Tablet',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           const SizedBox(height: 4),
 
-                          // User Info
+                          // User Info (keep existing)
                           Text(
                             state.user.username,
                             style: TextStyle(
@@ -163,7 +191,52 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
 
-            // Navigation Items
+            // Access Notice for Mobile/Tablet
+            if (isMobileOrTablet) ...[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          isMobile ? Icons.phone_android : Icons.tablet_android,
+                          color: Colors.orange[700],
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${isMobile ? "Mobile" : "Tablet"} Access',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.orange[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Limited features available.\nUse desktop for full access.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.orange[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Modified Navigation Items
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -171,6 +244,8 @@ class AppDrawer extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = _drawerItems[index];
                   final isSelected = selectedIndex == index;
+                  final isAvailable = !isMobileOrTablet || item.availableOnMobileTablet;
+                  final isRestricted = isMobileOrTablet && !item.availableOnMobileTablet;
 
                   return Container(
                     margin: const EdgeInsets.symmetric(
@@ -190,29 +265,78 @@ class AppDrawer extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppTheme.primaryColor
-                              : Colors.grey.withOpacity(0.1),
+                              : isRestricted
+                                  ? Colors.grey.withOpacity(0.3)
+                                  : Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
-                          item.icon,
-                          color: isSelected ? Colors.white : Colors.grey[600],
-                          size: 22,
+                        child: Stack(
+                          children: [
+                            Center(
+                              child: Icon(
+                                item.icon,
+                                color: isSelected
+                                    ? Colors.white
+                                    : isRestricted
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                size: 22,
+                              ),
+                            ),
+                            if (isRestricted)
+                              Positioned(
+                                top: 2,
+                                right: 2,
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange[700],
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Icon(
+                                    Icons.lock,
+                                    color: Colors.white,
+                                    size: 8,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      title: Text(
-                        item.title,
-                        style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected
-                              ? AppTheme.primaryColor
-                              : const Color(0xFF1F2937),
-                          fontSize: 16,
-                        ),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.title,
+                              style: TextStyle(
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? AppTheme.primaryColor
+                                    : isRestricted
+                                        ? Colors.grey[400]
+                                        : const Color(0xFF1F2937),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          if (isRestricted) ...[
+                            Icon(
+                              Icons.desktop_windows_outlined,
+                              size: 14,
+                              color: Colors.grey[400],
+                            ),
+                          ],
+                        ],
                       ),
                       subtitle: Text(
-                        item.subtitle,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        isRestricted ? 'Desktop only' : item.subtitle,
+                        style: TextStyle(
+                          color: isRestricted ? Colors.grey[400] : Colors.grey[600],
+                          fontSize: 12,
+                        ),
                       ),
                       onTap: () => onItemTapped(index),
                       shape: RoundedRectangleBorder(
@@ -222,13 +346,14 @@ class AppDrawer extends StatelessWidget {
                         horizontal: 16,
                         vertical: 4,
                       ),
+                      enabled: isAvailable,
                     ),
                   );
                 },
               ),
             ),
 
-            // Footer
+            // Modified Footer
             Container(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -238,13 +363,17 @@ class AppDrawer extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.info_outline,
+                        isMobileOrTablet 
+                            ? (isMobile ? Icons.phone_android : Icons.tablet_android)
+                            : Icons.desktop_windows,
                         size: 16,
                         color: Colors.grey[600],
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Version 1.0.0',
+                        isMobileOrTablet 
+                            ? '${isMobile ? "Mobile" : "Tablet"} v1.0.0'
+                            : 'Desktop v1.0.0',
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     ],

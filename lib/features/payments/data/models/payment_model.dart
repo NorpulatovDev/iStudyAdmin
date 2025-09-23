@@ -7,8 +7,8 @@ part 'payment_model.g.dart';
 @JsonSerializable()
 class PaymentModel extends Equatable {
   final int id;
-  final int studentId;
-  final String studentName;
+  final int? studentId;
+  final String? studentName;
   final int courseId;
   final String courseName;
   final int? groupId;

@@ -8,8 +8,8 @@ part of 'payment_model.dart';
 
 PaymentModel _$PaymentModelFromJson(Map<String, dynamic> json) => PaymentModel(
       id: (json['id'] as num).toInt(),
-      studentId: (json['studentId'] as num).toInt(),
-      studentName: json['studentName'] as String,
+      studentId: (json['studentId'] as num?)?.toInt(),
+      studentName: json['studentName'] as String?,
       courseId: (json['courseId'] as num).toInt(),
       courseName: json['courseName'] as String,
       groupId: (json['groupId'] as num?)?.toInt(),
