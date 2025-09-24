@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:istudyadmin/features/groups/data/models/group_model.dart';
 import '../bloc/course_bloc.dart';
 import '../widgets/course_form_dialog.dart';
 import '../../data/models/course_model.dart';
@@ -32,62 +33,91 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: BlocListener<CourseBloc, CourseState>(
-              listener: (context, state) {
-                if (state is CourseOperationSuccess) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  _loadCourseDetails(); // Refresh data
-                } else if (state is CourseError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-              child: BlocBuilder<CourseBloc, CourseState>(
-                builder: (context, state) {
-                  if (state is CourseLoading) {
-                    return const Center(child: CircularProgressIndicator());
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.grey[50],
+    body: Column(
+      children: [
+        _buildHeader(),
+        Expanded(
+          child: MultiBlocListener(
+            listeners: [
+              // Existing CourseBloc listener
+              BlocListener<CourseBloc, CourseState>(
+                listener: (context, state) {
+                  if (state is CourseOperationSuccess) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    _loadCourseDetails(); // Refresh data
+                  } else if (state is CourseError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
                   }
-
-                  if (state is CourseDetailLoaded) {
-                    return _buildCourseDetails(state.course);
-                  }
-
-                  if (state is CourseError) {
-                    return _buildErrorState(state.message);
-                  }
-
-                  return const Center(
-                    child: Text(
-                      'No course data available',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  );
                 },
               ),
+              // NEW: GroupBloc listener to refresh course when groups change
+              BlocListener<GroupBloc, GroupState>(
+                listener: (context, state) {
+                  if (state is GroupOperationSuccess) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    // Refresh course details to show updated groups
+                    _loadCourseDetails();
+                  } else if (state is GroupError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+            child: BlocBuilder<CourseBloc, CourseState>(
+              builder: (context, state) {
+                if (state is CourseLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state is CourseDetailLoaded) {
+                  return _buildCourseDetails(state.course);
+                }
+
+                if (state is CourseError) {
+                  return _buildErrorState(state.message);
+                }
+
+                return const Center(
+                  child: Text(
+                    'No course data available',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                );
+              },
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildHeader() {
     return Container(
@@ -485,226 +515,249 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
     );
   }
 
-  Widget _buildGroupsSection(CourseModel course) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.05),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+  
+// Updated _buildGroupsSection method in course_details_page.dart
+
+Widget _buildGroupsSection(CourseModel course) {
+  return Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 20,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withOpacity(0.05),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+            border: Border(
+              bottom: BorderSide(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
               ),
-              border: Border(
-                bottom: BorderSide(
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.groups,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
                 ),
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.groups,
-                    color: Theme.of(context).primaryColor,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Course Groups',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${course.groups?.length ?? 0} groups available',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _showAddGroupDialog(course),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Add Group'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (course.groups == null || course.groups!.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(40),
-              child: Center(
+              const SizedBox(width: 16),
+              Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.group_off,
-                        size: 48,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     Text(
-                      'No groups available',
+                      'Course Groups',
                       style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
-                      'Create your first group to start organizing students.',
-                      textAlign: TextAlign.center,
+                      '${course.groups?.length ?? 0} groups available',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[500],
+                        color: Colors.grey[600],
                       ),
                     ),
                   ],
                 ),
               ),
-            )
-          else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: course.groups!.length,
-              separatorBuilder: (context, index) => Divider(
-                height: 1,
-                color: Colors.grey[200],
-              ),
-              itemBuilder: (context, index) {
-                final group = course.groups![index];
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
+              ElevatedButton.icon(
+                onPressed: () => _showAddGroupDialog(course),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Group'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
                     vertical: 12,
                   ),
-                  leading: Container(
-                    padding: const EdgeInsets.all(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (course.groups == null || course.groups!.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(40),
+            child: Center(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                      color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    child: Icon(
+                      Icons.group_off,
+                      size: 48,
+                      color: Colors.grey[400],
                     ),
                   ),
-                  title: Text(
-                    group.name,
-                    style: const TextStyle(
+                  const SizedBox(height: 16),
+                  Text(
+                    'No groups available',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Create your first group to start organizing students.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: course.groups!.length,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: Colors.grey[200],
+            ),
+            itemBuilder: (context, index) {
+              final group = course.groups![index];
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                leading: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.people, size: 14, color: Colors.grey[600]),
+                ),
+                title: Text(
+                  group.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.people, size: 14, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${group.studentCount} students',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (group.teacherName != null) ...[
+                          const SizedBox(width: 12),
+                          Icon(Icons.person,
+                              size: 14, color: Colors.grey[600]),
                           const SizedBox(width: 4),
                           Text(
-                            '${group.studentCount} students',
+                            group.teacherName!,
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 14,
                             ),
                           ),
-                          if (group.teacherName != null) ...[
-                            const SizedBox(width: 12),
-                            Icon(Icons.person,
-                                size: 14, color: Colors.grey[600]),
-                            const SizedBox(width: 4),
-                            Text(
-                              group.teacherName!,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
                         ],
-                      ),
-                    ],
-                  ),
-                  trailing: Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey[400],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            GroupDetailsPage(groupId: group.id),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-        ],
+                      ],
+                    ),
+                  ],
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Colors.grey[400],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          GroupDetailsPage(groupId: group.id),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+      ],
+    ),
+  );
+}
+
+
+// Updated _showAddGroupDialog method
+void _showAddGroupDialog(CourseModel course) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) => BlocListener<GroupBloc, GroupState>(
+      listener: (context, state) {
+        if (state is GroupOperationSuccess) {
+          // Refresh course details to show the new group
+          _loadCourseDetails();
+        }
+      },
+      child: CreateGroupDialog(
+        courseId: course.id,
+        branchId: course.branchId,
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildErrorState(String message) {
     return Center(
@@ -779,18 +832,18 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
     );
   }
 
-  void _showAddGroupDialog(CourseModel course) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => BlocProvider.value(
-        value: context.read<GroupBloc>(),
-        child: CreateGroupDialog(
-          courseId: course.id,
-          branchId: course.branchId,
-        ),
-      ),
-    );
-  }
+  // void _showAddGroupDialog(CourseModel course) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (dialogContext) => BlocProvider.value(
+  //       value: context.read<GroupBloc>(),
+  //       child: CreateGroupDialog(
+  //         courseId: course.id,
+  //         branchId: course.branchId,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _showEditCourseDialog(CourseModel course) {
     showDialog(

@@ -70,11 +70,12 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
       // Add to local cache
       _allCourses.add(newCourse);
+      _currentBranchId = event.branchId;
       
       emit(const CourseOperationSuccess('Course created successfully'));
       
-      // Refresh the list
-      add(CourseRefreshRequested(branchId: event.branchId));
+      // Immediately emit updated courses list instead of adding refresh event
+      emit(CourseLoaded(_allCourses));
     } catch (e) {
       emit(CourseError(e.toString()));
     }
@@ -108,8 +109,8 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       if (state is CourseDetailLoaded) {
         emit(CourseDetailLoaded(updatedCourse));
       } else {
-        // Otherwise refresh the list
-        add(CourseRefreshRequested(branchId: event.branchId));
+        // Otherwise emit updated courses list
+        emit(CourseLoaded(_allCourses));
       }
     } catch (e) {
       emit(CourseError(e.toString()));
@@ -130,8 +131,8 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
       emit(const CourseOperationSuccess('Course deleted successfully'));
       
-      // Refresh the list
-      add(CourseRefreshRequested(branchId: _currentBranchId));
+      // Immediately emit updated courses list
+      emit(CourseLoaded(_allCourses));
     } catch (e) {
       emit(CourseError(e.toString()));
     }

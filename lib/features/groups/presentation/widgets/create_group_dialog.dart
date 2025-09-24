@@ -413,63 +413,41 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   }
 
   Widget _buildActionButtons(BuildContext context, bool isDesktop) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isDesktop ? 24 : 16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
-      ),
-      child: BlocConsumer<GroupBloc, GroupState>(
-        listener: (context, state) {
-          if (state is GroupOperationSuccess) {
-            Navigator.of(context).pop();
-          } else if (state is GroupError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          final isLoading = state is GroupOperationLoading;
-          
-          return Flex(
-            direction: isDesktop ? Axis.horizontal : Axis.vertical,
-            mainAxisAlignment: isDesktop ? MainAxisAlignment.end : MainAxisAlignment.center,
-            children: [
-              if (!isDesktop) ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : _submitForm,
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Create Group'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-              ] else ...[
-                TextButton(
-                  onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton(
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(isDesktop ? 24 : 16),
+    decoration: BoxDecoration(
+      color: Colors.grey[50],
+      border: Border(top: BorderSide(color: Colors.grey[200]!)),
+    ),
+    child: BlocConsumer<GroupBloc, GroupState>(
+      listener: (context, state) {
+        if (state is GroupOperationSuccess) {
+          // Close the dialog when group is created successfully
+          Navigator.of(context).pop();
+          // The parent CourseDetailsPage will listen to this state
+          // and refresh the course details automatically
+        } else if (state is GroupError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is GroupOperationLoading;
+        
+        return Flex(
+          direction: isDesktop ? Axis.horizontal : Axis.vertical,
+          mainAxisAlignment: isDesktop ? MainAxisAlignment.end : MainAxisAlignment.center,
+          children: [
+            if (!isDesktop) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
                   onPressed: isLoading ? null : _submitForm,
                   child: isLoading
                       ? const SizedBox(
@@ -479,13 +457,38 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                         )
                       : const Text('Create Group'),
                 ),
-              ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+              ),
+            ] else ...[
+              TextButton(
+                onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: isLoading ? null : _submitForm,
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Create Group'),
+              ),
             ],
-          );
-        },
-      ),
-    );
-  }
+          ],
+        );
+      },
+    ),
+  );
+}
 
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;

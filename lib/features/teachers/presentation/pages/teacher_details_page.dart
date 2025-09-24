@@ -859,14 +859,15 @@ class _TeacherDetailsPageState extends State<TeacherDetailsPage> {
                       size: 16,
                       color: Colors.grey[400],
                     ),
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async{
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
                               GroupDetailsPage(groupId: group.id),
                         ),
                       );
+                      _loadTeacherDetails();
                     },
                   );
                 },
