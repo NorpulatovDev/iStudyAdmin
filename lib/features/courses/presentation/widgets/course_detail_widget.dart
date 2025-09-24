@@ -66,7 +66,7 @@ class CourseDetailWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            course.name,
+            course.name?? "N/A",
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,

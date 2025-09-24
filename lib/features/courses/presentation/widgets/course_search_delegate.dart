@@ -41,7 +41,7 @@ class CourseSearchDelegate extends SearchDelegate<CourseModel?> {
   Widget _buildSearchResults() {
     final filteredCourses = courses.where((course) {
       final searchLower = query.toLowerCase();
-      return course.name.toLowerCase().contains(searchLower) ||
+      return course.name!.toLowerCase().contains(searchLower) ||
              (course.description?.toLowerCase().contains(searchLower) ?? false) ||
              course.branchName.toLowerCase().contains(searchLower);
     }).toList();
@@ -76,12 +76,12 @@ class CourseSearchDelegate extends SearchDelegate<CourseModel?> {
         return ListTile(
           leading: CircleAvatar(
             child: Text(
-              course.name.substring(0, 1).toUpperCase(),
+              course.name?? "N/A".substring(0, 1).toUpperCase(),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           title: Text(
-            course.name,
+            course.name?? "N/A",
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           subtitle: Column(

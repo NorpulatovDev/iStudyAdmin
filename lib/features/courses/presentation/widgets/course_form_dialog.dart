@@ -31,7 +31,7 @@ class _CourseFormDialogState extends State<CourseFormDialog> {
   void initState() {
     super.initState();
     if (isEditing) {
-      _nameController.text = widget.course!.name;
+      _nameController.text = widget.course!.name?? "N/A";
       _descriptionController.text = widget.course!.description ?? '';
       _priceController.text = widget.course!.price.toString();
       _durationController.text = widget.course!.durationMonths?.toString() ?? '';

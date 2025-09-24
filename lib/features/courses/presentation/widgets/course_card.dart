@@ -52,7 +52,7 @@ class CourseCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      course.name,
+                      course.name ?? "N/A",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

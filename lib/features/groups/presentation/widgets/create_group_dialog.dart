@@ -51,6 +51,27 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
     super.dispose();
   }
 
+  // Custom validator for time fields
+  String? _validateTime(TimeOfDay? time, String fieldName) {
+    if (time == null) {
+      return '$fieldName is required';
+    }
+    return null;
+  }
+
+  // Validate that start time is before end time
+  String? _validateTimeOrder() {
+    if (_startTime != null && _endTime != null) {
+      final startMinutes = _startTime!.hour * 60 + _startTime!.minute;
+      final endMinutes = _endTime!.hour * 60 + _endTime!.minute;
+      
+      if (startMinutes >= endMinutes) {
+        return 'Start time must be before end time';
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -65,7 +86,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
         height: isDesktop ? null : screenHeight * 0.9,
         constraints: BoxConstraints(
           maxWidth: isDesktop ? 600 : double.infinity,
-          maxHeight: isDesktop ? 700 : double.infinity,
+          maxHeight: isDesktop ? 750 : double.infinity,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -142,36 +163,62 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
             ),
             const SizedBox(height: 16),
             
-            // Teacher Selection
+            // Teacher Selection - Now Required
             _buildTeacherDropdown(),
             const SizedBox(height: 16),
             
-            // Time Selection - Responsive layout
+            // Time Selection - Now Required - Responsive layout
             if (isDesktop || isTablet)
               Row(
                 children: [
-                  Expanded(child: _buildTimeField(context, 'Start Time', _startTime, true)),
+                  Expanded(child: _buildRequiredTimeField(context, 'Start Time *', _startTime, true)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildTimeField(context, 'End Time', _endTime, false)),
+                  Expanded(child: _buildRequiredTimeField(context, 'End Time *', _endTime, false)),
                 ],
               )
             else
               Column(
                 children: [
-                  _buildTimeField(context, 'Start Time', _startTime, true),
+                  _buildRequiredTimeField(context, 'Start Time *', _startTime, true),
                   const SizedBox(height: 16),
-                  _buildTimeField(context, 'End Time', _endTime, false),
+                  _buildRequiredTimeField(context, 'End Time *', _endTime, false),
                 ],
+              ),
+            
+            // Show time validation error if needed
+            if (_startTime != null && _endTime != null && _validateTimeOrder() != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  _validateTimeOrder()!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
+                ),
               ),
             const SizedBox(height: 16),
             
             // Days of Week Selection
             const Text(
-              'Days of Week',
+              'Days of Week *',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             _buildDaysSelection(isDesktop, isTablet),
+            
+            // Show days validation error
+            if (_selectedDays.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Please select at least one day',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
             const SizedBox(height: 16),
             
             // Course and Branch info
@@ -207,9 +254,12 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
           return DropdownButtonFormField<int?>(
             value: _selectedTeacherId,
             decoration: InputDecoration(
-              labelText: 'Teacher',
+              labelText: 'Teacher *',
               prefixIcon: const Icon(Icons.person),
               border: const OutlineInputBorder(),
+              errorBorder: _selectedTeacherId == null ? OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+              ) : null,
               suffixIcon: teachers.isEmpty 
                 ? IconButton(
                     icon: const Icon(Icons.refresh),
@@ -219,13 +269,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                 : null,
             ),
             items: [
-              const DropdownMenuItem<int?>(
-                value: null,
-                child: Text(
-                  'No teacher assigned',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
+              // Remove the "No teacher assigned" option
               ...teachers.map((teacher) {
                 return DropdownMenuItem<int?>(
                   value: teacher.id,
@@ -238,9 +282,15 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                 _selectedTeacherId = value;
               });
             },
+            validator: (value) {
+              if (value == null) {
+                return 'Please select a teacher';
+              }
+              return null;
+            },
             hint: Text(teachers.isEmpty 
-              ? 'No teachers available' 
-              : 'Select a teacher (optional)'),
+              ? 'No teachers available - Create a teacher first' 
+              : 'Select a teacher'),
           );
         } else if (state is TeacherError) {
           return Column(
@@ -267,72 +317,85 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
               ),
               const SizedBox(height: 8),
               Text(
-                'You can still create the group without a teacher',
+                'Teacher selection is required to create a group',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
-                  fontStyle: FontStyle.italic,
+                  color: Colors.red[600],
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           );
         }
 
-        // Initial state - show a basic dropdown
+        // Initial state - show loading dropdown
         return DropdownButtonFormField<int?>(
           value: _selectedTeacherId,
           decoration: const InputDecoration(
-            labelText: 'Teacher',
+            labelText: 'Teacher *',
             prefixIcon: Icon(Icons.person),
             border: OutlineInputBorder(),
           ),
-          items: const [
-            DropdownMenuItem<int?>(
-              value: null,
-              child: Text('No teacher assigned'),
-            ),
-          ],
-          onChanged: (value) {
-            setState(() {
-              _selectedTeacherId = value;
-            });
-          },
+          items: const [],
+          onChanged: null, // Disabled while loading
           hint: const Text('Loading teachers...'),
         );
       },
     );
   }
 
-  Widget _buildTimeField(BuildContext context, String label, TimeOfDay? time, bool isStartTime) {
-    return InkWell(
-      onTap: () => _selectTime(context, isStartTime),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: const Icon(Icons.access_time),
-          border: const OutlineInputBorder(),
-          suffixIcon: time != null
-              ? IconButton(
-                  icon: const Icon(Icons.clear, size: 18),
-                  onPressed: () {
-                    setState(() {
-                      if (isStartTime) {
-                        _startTime = null;
-                      } else {
-                        _endTime = null;
-                      }
-                    });
-                  },
-                )
-              : null,
-        ),
-        child: Text(
-          time?.format(context) ?? 'Select $label',
-          style: TextStyle(
-            color: time != null ? Colors.black : Colors.grey[600],
+  // Updated time field that shows required validation
+  Widget _buildRequiredTimeField(BuildContext context, String label, TimeOfDay? time, bool isStartTime) {
+    final hasError = time == null;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => _selectTime(context, isStartTime),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: label,
+              prefixIcon: const Icon(Icons.access_time),
+              border: const OutlineInputBorder(),
+              errorBorder: hasError ? OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+              ) : null,
+              suffixIcon: time != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () {
+                        setState(() {
+                          if (isStartTime) {
+                            _startTime = null;
+                          } else {
+                            _endTime = null;
+                          }
+                        });
+                      },
+                    )
+                  : null,
+            ),
+            child: Text(
+              time?.format(context) ?? 'Select ${label.replaceAll(' *', '')}',
+              style: TextStyle(
+                color: time != null ? Colors.black : Colors.grey[600],
+              ),
+            ),
           ),
         ),
-      ),
+        if (hasError)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 12),
+            child: Text(
+              '${label.replaceAll(' *', '')} is required',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 12,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -413,41 +476,63 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   }
 
   Widget _buildActionButtons(BuildContext context, bool isDesktop) {
-  return Container(
-    width: double.infinity,
-    padding: EdgeInsets.all(isDesktop ? 24 : 16),
-    decoration: BoxDecoration(
-      color: Colors.grey[50],
-      border: Border(top: BorderSide(color: Colors.grey[200]!)),
-    ),
-    child: BlocConsumer<GroupBloc, GroupState>(
-      listener: (context, state) {
-        if (state is GroupOperationSuccess) {
-          // Close the dialog when group is created successfully
-          Navigator.of(context).pop();
-          // The parent CourseDetailsPage will listen to this state
-          // and refresh the course details automatically
-        } else if (state is GroupError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      },
-      builder: (context, state) {
-        final isLoading = state is GroupOperationLoading;
-        
-        return Flex(
-          direction: isDesktop ? Axis.horizontal : Axis.vertical,
-          mainAxisAlignment: isDesktop ? MainAxisAlignment.end : MainAxisAlignment.center,
-          children: [
-            if (!isDesktop) ...[
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isDesktop ? 24 : 16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: BlocConsumer<GroupBloc, GroupState>(
+        listener: (context, state) {
+          if (state is GroupOperationSuccess) {
+            Navigator.of(context).pop();
+          } else if (state is GroupError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state is GroupOperationLoading;
+          
+          return Flex(
+            direction: isDesktop ? Axis.horizontal : Axis.vertical,
+            mainAxisAlignment: isDesktop ? MainAxisAlignment.end : MainAxisAlignment.center,
+            children: [
+              if (!isDesktop) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _submitForm,
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Create Group'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+              ] else ...[
+                TextButton(
+                  onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
                   onPressed: isLoading ? null : _submitForm,
                   child: isLoading
                       ? const SizedBox(
@@ -457,63 +542,92 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                         )
                       : const Text('Create Group'),
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-              ),
-            ] else ...[
-              TextButton(
-                onPressed: isLoading ? null : () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: isLoading ? null : _submitForm,
-                child: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Create Group'),
-              ),
+              ],
             ],
-          ],
-        );
-      },
-    ),
-  );
-}
+          );
+        },
+      ),
+    );
+  }
 
   void _submitForm() {
+    // Validate form fields (including teacher dropdown)
     if (!_formKey.currentState!.validate()) return;
+    
+    // Double-check teacher is selected (additional validation)
+    if (_selectedTeacherId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a teacher'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    
+    // Validate required time fields
+    if (_startTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Start time is required'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    
+    if (_endTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('End time is required'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    
+    // Validate time order
+    if (_validateTimeOrder() != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_validateTimeOrder()!),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    
+    // Validate at least one day is selected
+    if (_selectedDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one day'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
     final name = _nameController.text.trim();
     
     // Format time to HH:mm
-    String? startTime;
-    String? endTime;
-    if (_startTime != null) {
-      startTime = '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}';
-    }
-    if (_endTime != null) {
-      endTime = '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}';
-    }
+    final startTime = '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}';
+    final endTime = '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}';
 
     context.read<GroupBloc>().add(
       GroupCreateRequested(
         name: name,
         courseId: widget.courseId,
         branchId: widget.branchId,
-        teacherId: _selectedTeacherId,
+        teacherId: _selectedTeacherId!, // Now guaranteed to be non-null
         startTime: startTime,
         endTime: endTime,
-        daysOfWeek: _selectedDays.isNotEmpty ? _selectedDays : null,
+        daysOfWeek: _selectedDays,
       ),
     );
   }

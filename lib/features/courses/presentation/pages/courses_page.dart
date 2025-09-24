@@ -262,7 +262,7 @@ class _CoursesPageState extends State<CoursesPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      course.name,
+                      course.name ?? "N/A",
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

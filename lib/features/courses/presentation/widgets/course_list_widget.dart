@@ -111,7 +111,7 @@ class CourseListWidget extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  course.name,
+                                  course.name?? "N/A",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
